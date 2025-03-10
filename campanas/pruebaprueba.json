@@ -1,0 +1,31 @@
+{
+    "nombre": "Pruebaprueba",
+    "ambientacion": "Fantasía",
+    "reglas_especiales": "nada",
+    "sin_muerte": false,
+    "exp_modificada": false,
+    "dificultad": "Normal",
+    "jugadores": [
+        {
+            "nombre": "Prueba",
+            "clase": "Bárbaro",
+            "raza": "Humano",
+            "nivel": 1,
+            "experiencia": 0,
+            "archivo": "prueba.json",
+            "estadisticas": {
+                "Fuerza": 15,
+                "Destreza": 13,
+                "Constitución": 13,
+                "Inteligencia": 8,
+                "Sabiduría": 8,
+                "Carisma": 12
+            },
+            "competencias": [
+                "Engaño",
+                "Sigilo"
+            ]
+        }
+    ],
+    "fecha_creacion": null
+}

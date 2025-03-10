@@ -8,11 +8,13 @@ Aplicación principal de Dungeons and Dragons para gestión de combates.
 import tkinter as tk
 from tkinter import ttk, messagebox, font
 import os
+import json
 
 # Importar módulos propios
 from modulos.nueva_campana import mostrar_nueva_campana
 from modulos.cargar_campana import mostrar_cargar_campana
 from modulos.gestor_personajes import mostrar_gestor_personajes
+from editores.editar_personaje import mostrar_editar_personaje
 
 class DnDApp:
     def __init__(self, root):
@@ -36,6 +38,14 @@ class DnDApp:
         self.directorio_campanas = "campanas"
         if not os.path.exists(self.directorio_campanas):
             os.makedirs(self.directorio_campanas)
+        
+        # Campaña actual
+        self.campana_actual = None
+        self.ruta_campana_actual = None
+        
+        # Etiqueta para mostrar la campaña actual
+        self.label_campana_actual = ttk.Label(self.root, text="Campaña: Ninguna", font=('Helvetica', 11))
+        self.label_campana_actual.place(relx=1.0, x=-10, y=10, anchor="ne")
         
         # Mostrar menú principal
         self.mostrar_menu_principal()
@@ -72,6 +82,12 @@ class DnDApp:
         for widget in self.main_frame.winfo_children():
             widget.destroy()
         
+        # Actualizar etiqueta de campaña actual
+        if self.campana_actual:
+            self.label_campana_actual.config(text=f"Campaña: {self.campana_actual.get('nombre', 'Sin nombre')}")
+        else:
+            self.label_campana_actual.config(text="Campaña: Ninguna")
+        
         # Título
         title_label = ttk.Label(self.main_frame, text="D&D Combat Manager", style="Title.TLabel")
         title_label.pack(pady=(30, 50))
@@ -83,12 +99,24 @@ class DnDApp:
         # Botones con las opciones del menú
         botones = [
             ("Nueva Campaña", lambda: mostrar_nueva_campana(self.root, self.directorio_campanas, self.mostrar_menu_principal)),
-            ("Cargar Campaña", lambda: mostrar_cargar_campana(self.root, self.directorio_campanas, self.mostrar_menu_principal)),
+            ("Cargar Campaña", lambda: mostrar_cargar_campana(self.root, self.directorio_campanas, self.mostrar_menu_principal, self.cargar_campana)),
             ("Gestor de Personajes", lambda: mostrar_gestor_personajes(self.root, self.mostrar_menu_principal)),
             ("Gestor de Monstruos", self.no_implementado),
-            ("DM Panel", self.no_implementado),
-            ("Simular Combate", self.no_implementado)
         ]
+        
+        # Añadir botones adicionales según haya campaña cargada o no
+        if self.campana_actual:
+            botones.extend([
+                ("Continuar Campaña Actual", lambda: self.continuar_campana_actual()),
+                ("Editar Campaña Actual", lambda: self.editar_campana_actual()),
+                ("DM Panel", self.no_implementado),
+                ("Simular Combate", self.no_implementado)
+            ])
+        else:
+            botones.extend([
+                ("DM Panel", self.no_implementado),
+                ("Simular Combate", self.no_implementado)
+            ])
         
         # Configurar el frame de botones para expansión
         button_frame.columnconfigure(0, weight=1)
@@ -104,6 +132,37 @@ class DnDApp:
         
         # Mostrar el frame
         self.main_frame.pack(fill="both", expand=True, padx=10, pady=10)
+    
+    def cargar_campana(self, campana, ruta):
+        """Carga una campaña como la campaña actual"""
+        self.campana_actual = campana
+        self.ruta_campana_actual = ruta
+        # Actualizar el indicador de campaña
+        self.label_campana_actual.config(text=f"Campaña: {campana.get('nombre', 'Sin nombre')}")
+        # Volver al menú principal
+        self.mostrar_menu_principal()
+    
+    def continuar_campana_actual(self):
+        """Implementar continuación de la campaña actual"""
+        if not self.campana_actual:
+            messagebox.showinfo("Información", "No hay ninguna campaña cargada.")
+            return
+        
+        # Mostrar detalles de la campaña para continuar
+        from modulos.cargar_campana import mostrar_detalles_campana
+        mostrar_detalles_campana(self.root, self.campana_actual, self.ruta_campana_actual, 
+                                self.mostrar_menu_principal, self.cargar_campana)
+    
+    def editar_campana_actual(self):
+        """Implementar edición de la campaña actual"""
+        if not self.campana_actual:
+            messagebox.showinfo("Información", "No hay ninguna campaña cargada.")
+            return
+        
+        # Llamar a la función para editar la campaña
+        from editores.editar_campana import mostrar_editar_campana
+        mostrar_editar_campana(self.root, self.campana_actual, self.ruta_campana_actual,
+                              self.directorio_campanas, self.cargar_campana, self.mostrar_menu_principal)
     
     def no_implementado(self):
         """Función temporal para opciones no implementadas"""

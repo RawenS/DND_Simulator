@@ -29,6 +29,30 @@ COMPETENCIAS = [
     "Religión", "Sigilo", "Supervivencia", "Trato con Animales"
 ]
 
+# Tabla de experiencia necesaria para cada nivel según D&D 5e
+TABLA_EXPERIENCIA = {
+    1: 0,
+    2: 300,
+    3: 900,
+    4: 2700,
+    5: 6500,
+    6: 14000,
+    7: 23000,
+    8: 34000,
+    9: 48000,
+    10: 64000,
+    11: 85000,
+    12: 100000,
+    13: 120000,
+    14: 140000,
+    15: 165000,
+    16: 195000,
+    17: 225000,
+    18: 265000,
+    19: 305000,
+    20: 355000
+}
+
 def mostrar_gestor_personajes(root, callback_menu):
     """
     Muestra la pantalla principal del gestor de personajes
@@ -79,7 +103,7 @@ def mostrar_gestor_personajes(root, callback_menu):
     lista_frame.pack(fill="both", expand=True, padx=50, pady=10)
     
     # Configurar grid para que se expanda
-    for i in range(6):  # 6 columnas
+    for i in range(7):  # 7 columnas (añadida columna para nivel/XP)
         lista_frame.columnconfigure(i, weight=1)
     
     # Obtener lista de personajes guardados
@@ -102,9 +126,10 @@ def mostrar_gestor_personajes(root, callback_menu):
         ttk.Label(lista_frame, text="Nombre", font=('Helvetica', 11, 'bold')).grid(row=0, column=0, padx=5, pady=5, sticky="w")
         ttk.Label(lista_frame, text="Clase", font=('Helvetica', 11, 'bold')).grid(row=0, column=1, padx=5, pady=5, sticky="w")
         ttk.Label(lista_frame, text="Raza", font=('Helvetica', 11, 'bold')).grid(row=0, column=2, padx=5, pady=5, sticky="w")
-        ttk.Label(lista_frame, text="Estadísticas", font=('Helvetica', 11, 'bold')).grid(row=0, column=3, padx=5, pady=5, sticky="w")
-        ttk.Label(lista_frame, text="Ataques", font=('Helvetica', 11, 'bold')).grid(row=0, column=4, padx=5, pady=5, sticky="w")
-        ttk.Label(lista_frame, text="Acciones", font=('Helvetica', 11, 'bold')).grid(row=0, column=5, padx=5, pady=5, sticky="w")
+        ttk.Label(lista_frame, text="Nivel/XP", font=('Helvetica', 11, 'bold')).grid(row=0, column=3, padx=5, pady=5, sticky="w")
+        ttk.Label(lista_frame, text="Estadísticas", font=('Helvetica', 11, 'bold')).grid(row=0, column=4, padx=5, pady=5, sticky="w")
+        ttk.Label(lista_frame, text="Ataques", font=('Helvetica', 11, 'bold')).grid(row=0, column=5, padx=5, pady=5, sticky="w")
+        ttk.Label(lista_frame, text="Acciones", font=('Helvetica', 11, 'bold')).grid(row=0, column=6, padx=5, pady=5, sticky="w")
         
         # Mostrar personajes
         for i, personaje in enumerate(personajes):
@@ -119,6 +144,11 @@ def mostrar_gestor_personajes(root, callback_menu):
             
             ttk.Label(lista_frame, text=personaje.get("raza", "")).grid(row=i+1, column=2, padx=5, pady=3, sticky="w")
             
+            # Nivel y experiencia
+            nivel = personaje.get("nivel", 1)
+            experiencia = personaje.get("experiencia", 0)
+            ttk.Label(lista_frame, text=f"Nv.{nivel} ({experiencia} XP)").grid(row=i+1, column=3, padx=5, pady=3, sticky="w")
+            
             # Estadísticas en formato resumido
             estadisticas = personaje.get("estadisticas", {})
             texto_stats = f"F:{estadisticas.get('Fuerza', '-')} "
@@ -128,7 +158,7 @@ def mostrar_gestor_personajes(root, callback_menu):
             texto_stats += f"S:{estadisticas.get('Sabiduría', '-')} "
             texto_stats += f"CA:{estadisticas.get('Carisma', '-')}"
             
-            ttk.Label(lista_frame, text=texto_stats).grid(row=i+1, column=3, padx=5, pady=3, sticky="w")
+            ttk.Label(lista_frame, text=texto_stats).grid(row=i+1, column=4, padx=5, pady=3, sticky="w")
             
             # Información de ataques
             ataque_info = ""
@@ -138,11 +168,11 @@ def mostrar_gestor_personajes(root, callback_menu):
             ataque_info += f"F: {personaje.get('ataque_fuerza', '+0')} "
             ataque_info += f"D: {personaje.get('ataque_destreza', '+0')}"
             
-            ttk.Label(lista_frame, text=ataque_info, foreground="#8B0000").grid(row=i+1, column=4, padx=5, pady=3, sticky="w")
+            ttk.Label(lista_frame, text=ataque_info, foreground="#8B0000").grid(row=i+1, column=5, padx=5, pady=3, sticky="w")
             
             # Botones de acción
             acciones_frame = ttk.Frame(lista_frame)
-            acciones_frame.grid(row=i+1, column=5, padx=5, pady=3, sticky="w")
+            acciones_frame.grid(row=i+1, column=6, padx=5, pady=3, sticky="w")
             
             # Índice actual para las lambdas
             idx = i
@@ -275,6 +305,107 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
     raza_var = tk.StringVar(value=personaje.get("raza", "") if personaje else "")
     ttk.Combobox(tab_basicos, textvariable=raza_var, values=RAZAS, width=38).grid(row=2, column=1, sticky="ew", padx=10, pady=10)
     
+    # Nivel y Experiencia
+    nivel_frame = ttk.Frame(tab_basicos)
+    nivel_frame.grid(row=3, column=0, columnspan=2, sticky="w", padx=10, pady=10)
+    
+    ttk.Label(nivel_frame, text="Nivel:").grid(row=0, column=0, sticky="w", padx=10, pady=5)
+    nivel_var = tk.StringVar(value=str(personaje.get("nivel", 1)) if personaje else "1")
+    nivel_entry = ttk.Spinbox(nivel_frame, from_=1, to=20, textvariable=nivel_var, width=5)
+    nivel_entry.grid(row=0, column=1, padx=5, pady=5)
+    
+    ttk.Label(nivel_frame, text="Experiencia:").grid(row=0, column=2, sticky="w", padx=20, pady=5)
+    experiencia_var = tk.StringVar(value=str(personaje.get("experiencia", 0)) if personaje else "0")
+    experiencia_entry = ttk.Entry(nivel_frame, textvariable=experiencia_var, width=10)
+    experiencia_entry.grid(row=0, column=3, padx=5, pady=5)
+    
+    # Información sobre experiencia
+    exp_info_frame = ttk.Frame(tab_basicos)
+    exp_info_frame.grid(row=4, column=0, columnspan=2, sticky="w", padx=10, pady=0)
+    
+    ttk.Label(exp_info_frame, text="Experiencia para siguiente nivel:", font=('Helvetica', 10)).grid(row=0, column=0, sticky="w", padx=10, pady=2)
+    exp_siguiente_var = tk.StringVar(value="")
+    ttk.Label(exp_info_frame, textvariable=exp_siguiente_var, width=10).grid(row=0, column=1, sticky="w", padx=5, pady=2)
+    
+    ttk.Label(exp_info_frame, text="Experiencia restante:", font=('Helvetica', 10)).grid(row=1, column=0, sticky="w", padx=10, pady=2)
+    exp_restante_var = tk.StringVar(value="")
+    ttk.Label(exp_info_frame, textvariable=exp_restante_var, width=10).grid(row=1, column=1, sticky="w", padx=5, pady=2)
+    
+    # Función para actualizar nivel basado en la experiencia
+    def calcular_nivel_desde_experiencia():
+        try:
+            experiencia = int(experiencia_var.get())
+            # Encontrar el nivel correspondiente a la experiencia
+            nuevo_nivel = 1
+            for lvl, exp_needed in sorted(TABLA_EXPERIENCIA.items()):
+                if experiencia >= exp_needed:
+                    nuevo_nivel = lvl
+                else:
+                    break
+            
+            # Actualizar nivel
+            nivel_var.set(str(nuevo_nivel))
+            
+            # Calcular experiencia para siguiente nivel y restante
+            if nuevo_nivel < 20:
+                exp_siguiente = TABLA_EXPERIENCIA[nuevo_nivel + 1]
+                exp_restante = exp_siguiente - experiencia
+                exp_siguiente_var.set(str(exp_siguiente))
+                exp_restante_var.set(str(exp_restante))
+            else:
+                exp_siguiente_var.set("Máx.")
+                exp_restante_var.set("Máx.")
+            
+            # Actualizar bonificadores relacionados con el nivel
+            calcular_modificador()
+            
+        except ValueError:
+            experiencia_var.set("0")
+            nivel_var.set("1")
+            exp_siguiente_var.set("300")
+            exp_restante_var.set("300")
+    
+    # Función para actualizar experiencia basada en el nivel
+    def calcular_experiencia_desde_nivel():
+        try:
+            nivel = int(nivel_var.get())
+            if nivel < 1:
+                nivel = 1
+                nivel_var.set("1")
+            elif nivel > 20:
+                nivel = 20
+                nivel_var.set("20")
+            
+            # Establecer experiencia mínima para el nivel
+            experiencia = TABLA_EXPERIENCIA[nivel]
+            experiencia_var.set(str(experiencia))
+            
+            # Calcular experiencia para siguiente nivel y restante
+            if nivel < 20:
+                exp_siguiente = TABLA_EXPERIENCIA[nivel + 1]
+                exp_restante = exp_siguiente - experiencia
+                exp_siguiente_var.set(str(exp_siguiente))
+                exp_restante_var.set(str(exp_restante))
+            else:
+                exp_siguiente_var.set("Máx.")
+                exp_restante_var.set("Máx.")
+            
+            # Actualizar bonificadores relacionados con el nivel
+            calcular_modificador()
+            
+        except (ValueError, KeyError):
+            nivel_var.set("1")
+            experiencia_var.set("0")
+            exp_siguiente_var.set("300")
+            exp_restante_var.set("300")
+    
+    # Vincular eventos para nivel y experiencia
+    nivel_entry.bind("<KeyRelease>", lambda e: calcular_experiencia_desde_nivel())
+    nivel_entry.bind("<<Increment>>", lambda e: calcular_experiencia_desde_nivel())
+    nivel_entry.bind("<<Decrement>>", lambda e: calcular_experiencia_desde_nivel())
+    
+    experiencia_entry.bind("<KeyRelease>", lambda e: calcular_nivel_desde_experiencia())
+    
     # ===== ESTADÍSTICAS Y COMPETENCIAS =====
     tab_estadisticas = ttk.Frame(notebook)
     notebook.add(tab_estadisticas, text="Estadísticas y Competencias")
@@ -287,9 +418,6 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
     stats_vars = {}
     mod_vars = {}
     stats_datos = personaje.get("estadisticas", {}) if personaje else {}
-    
-    # Definir nivel_var
-    nivel_var = tk.StringVar(value="1")
     
     # Función para calcular modificador
     def calcular_modificador(event=None):
@@ -524,6 +652,9 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
     
     # Inicializar modificadores y cálculos
     actualizar_todo()
+    
+    # Inicializar información de nivel/experiencia
+    calcular_experiencia_desde_nivel()
     
     # ===== INVENTARIO Y EQUIPAMIENTO =====
     tab_inventario = ttk.Frame(notebook)
@@ -801,6 +932,195 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
     # Actualizar pestañas según la clase inicial
     actualizar_tabs_hechizos()
     
+    # ===== PESTAÑA DE PROGRESIÓN =====
+    tab_progresion = ttk.Frame(notebook)
+    notebook.add(tab_progresion, text="Progresión")
+    
+    # Título
+    ttk.Label(tab_progresion, text="Gestión de Experiencia y Nivel", font=('Helvetica', 14, 'bold')).pack(pady=(20, 10))
+    
+    # Frame para información de nivel actual
+    nivel_info_frame = ttk.LabelFrame(tab_progresion, text="Nivel Actual")
+    nivel_info_frame.pack(fill="x", padx=20, pady=10)
+    
+    # Grid para organizar información
+    for i in range(2):
+        nivel_info_frame.columnconfigure(i, weight=1)
+    
+    ttk.Label(nivel_info_frame, text="Nivel:", font=('Helvetica', 12, 'bold')).grid(row=0, column=0, padx=10, pady=5, sticky="w")
+    nivel_actual_var = tk.StringVar()
+    nivel_actual_label = ttk.Label(nivel_info_frame, textvariable=nivel_actual_var, font=('Helvetica', 12))
+    nivel_actual_label.grid(row=0, column=1, padx=10, pady=5, sticky="w")
+    
+    ttk.Label(nivel_info_frame, text="Experiencia:", font=('Helvetica', 12, 'bold')).grid(row=1, column=0, padx=10, pady=5, sticky="w")
+    exp_actual_var = tk.StringVar()
+    exp_actual_label = ttk.Label(nivel_info_frame, textvariable=exp_actual_var, font=('Helvetica', 12))
+    exp_actual_label.grid(row=1, column=1, padx=10, pady=5, sticky="w")
+    
+    ttk.Label(nivel_info_frame, text="Experiencia para el siguiente nivel:", font=('Helvetica', 12, 'bold')).grid(row=2, column=0, padx=10, pady=5, sticky="w")
+    exp_siguiente_nivel_var = tk.StringVar()
+    exp_siguiente_label = ttk.Label(nivel_info_frame, textvariable=exp_siguiente_nivel_var, font=('Helvetica', 12))
+    exp_siguiente_label.grid(row=2, column=1, padx=10, pady=5, sticky="w")
+    
+    ttk.Label(nivel_info_frame, text="Experiencia restante:", font=('Helvetica', 12, 'bold')).grid(row=3, column=0, padx=10, pady=5, sticky="w")
+    exp_restante_var = tk.StringVar()
+    exp_restante_label = ttk.Label(nivel_info_frame, textvariable=exp_restante_var, font=('Helvetica', 12))
+    exp_restante_label.grid(row=3, column=1, padx=10, pady=5, sticky="w")
+    
+    # Frame para añadir experiencia
+    add_exp_frame = ttk.LabelFrame(tab_progresion, text="Añadir Experiencia")
+    add_exp_frame.pack(fill="x", padx=20, pady=10)
+    
+    # Grid para organizar inputs
+    add_exp_frame.columnconfigure(1, weight=1)
+    
+    ttk.Label(add_exp_frame, text="Cantidad de Experiencia:").grid(row=0, column=0, padx=10, pady=10, sticky="w")
+    add_exp_var = tk.StringVar(value="0")
+    ttk.Entry(add_exp_frame, textvariable=add_exp_var, width=10).grid(row=0, column=1, padx=10, pady=10, sticky="w")
+    
+    # Botones para añadir experiencia predefinida
+    exp_buttons_frame = ttk.Frame(add_exp_frame)
+    exp_buttons_frame.grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky="w")
+    
+    # Botones con cantidades comunes de experiencia
+    exp_values = [100, 250, 500, 1000, 2000, 5000]
+    for i, value in enumerate(exp_values):
+        ttk.Button(exp_buttons_frame, text=f"+{value} XP", 
+                  command=lambda v=value: add_exp_var.set(str(v))).pack(side="left", padx=5)
+    
+    # Botón para añadir experiencia
+    def add_experience():
+        try:
+            # Obtener experiencia actual
+            current_exp = int(experiencia_var.get())
+            # Obtener cantidad a añadir
+            add_amount = int(add_exp_var.get())
+            
+            if add_amount < 0:
+                messagebox.showwarning("Advertencia", "La cantidad de experiencia a añadir debe ser positiva.")
+                return
+            
+            # Calcular nueva experiencia
+            new_exp = current_exp + add_amount
+            
+            # Actualizar campo
+            experiencia_var.set(str(new_exp))
+            
+            # Actualizar nivel basado en la nueva experiencia
+            calcular_nivel_desde_experiencia()
+            
+            # Mostrar mensaje
+            messagebox.showinfo("Éxito", f"Se han añadido {add_amount} puntos de experiencia.\nExperiencia total: {new_exp}\nNivel actual: {nivel_var.get()}")
+            
+            # Actualizar displays
+            actualizar_displays_progresion()
+            
+        except ValueError:
+            messagebox.showwarning("Advertencia", "Debe ingresar un número válido.")
+    
+    ttk.Button(add_exp_frame, text="Añadir Experiencia", 
+              command=add_experience).grid(row=2, column=0, columnspan=2, padx=10, pady=10)
+    
+    # Frame para cambio directo de nivel
+    nivel_frame = ttk.LabelFrame(tab_progresion, text="Cambiar Nivel Directamente")
+    nivel_frame.pack(fill="x", padx=20, pady=10)
+    
+    # Grid para organizar inputs
+    nivel_frame.columnconfigure(1, weight=1)
+    
+    ttk.Label(nivel_frame, text="Nuevo Nivel:").grid(row=0, column=0, padx=10, pady=10, sticky="w")
+    nuevo_nivel_var = tk.StringVar(value="1")
+    nivel_spinner = ttk.Spinbox(nivel_frame, from_=1, to=20, textvariable=nuevo_nivel_var, width=5)
+    nivel_spinner.grid(row=0, column=1, padx=10, pady=10, sticky="w")
+    
+    # Botón para cambiar nivel
+    def change_level():
+        try:
+            # Obtener nuevo nivel
+            new_level = int(nuevo_nivel_var.get())
+            
+            if new_level < 1 or new_level > 20:
+                messagebox.showwarning("Advertencia", "El nivel debe estar entre 1 y 20.")
+                return
+            
+            # Actualizar nivel
+            nivel_var.set(str(new_level))
+            
+            # Actualizar experiencia basada en el nuevo nivel
+            calcular_experiencia_desde_nivel()
+            
+            # Mostrar mensaje
+            messagebox.showinfo("Éxito", f"Nivel actualizado a {new_level}.\nExperiencia ajustada a {experiencia_var.get()} puntos.")
+            
+            # Actualizar displays
+            actualizar_displays_progresion()
+            
+        except ValueError:
+            messagebox.showwarning("Advertencia", "Debe ingresar un número válido.")
+    
+    ttk.Button(nivel_frame, text="Cambiar Nivel", 
+              command=change_level).grid(row=1, column=0, columnspan=2, padx=10, pady=10)
+    
+    # Tabla de experiencia
+    exp_table_frame = ttk.LabelFrame(tab_progresion, text="Tabla de Experiencia (D&D 5e)")
+    exp_table_frame.pack(fill="x", padx=20, pady=10)
+    
+    # Grid para la tabla
+    exp_table = ttk.Frame(exp_table_frame)
+    exp_table.pack(fill="both", padx=10, pady=10)
+    
+    # Encabezados de la tabla
+    ttk.Label(exp_table, text="Nivel", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, padx=5, pady=2, sticky="w")
+    ttk.Label(exp_table, text="Experiencia", font=('Helvetica', 10, 'bold')).grid(row=0, column=1, padx=5, pady=2, sticky="w")
+    ttk.Label(exp_table, text="Bonif. Comp.", font=('Helvetica', 10, 'bold')).grid(row=0, column=2, padx=5, pady=2, sticky="w")
+    ttk.Label(exp_table, text="Nivel", font=('Helvetica', 10, 'bold')).grid(row=0, column=3, padx=5, pady=2, sticky="w")
+    ttk.Label(exp_table, text="Experiencia", font=('Helvetica', 10, 'bold')).grid(row=0, column=4, padx=5, pady=2, sticky="w")
+    ttk.Label(exp_table, text="Bonif. Comp.", font=('Helvetica', 10, 'bold')).grid(row=0, column=5, padx=5, pady=2, sticky="w")
+    
+    # Rellenar tabla
+    for lvl in range(1, 11):
+        # Bonificador de competencia
+        comp = 2 + ((lvl - 1) // 4)
+        
+        # Primera columna (niveles 1-10)
+        ttk.Label(exp_table, text=str(lvl)).grid(row=lvl, column=0, padx=5, pady=2, sticky="w")
+        ttk.Label(exp_table, text=str(TABLA_EXPERIENCIA[lvl])).grid(row=lvl, column=1, padx=5, pady=2, sticky="w")
+        ttk.Label(exp_table, text=f"+{comp}").grid(row=lvl, column=2, padx=5, pady=2, sticky="w")
+        
+        # Segunda columna (niveles 11-20)
+        lvl2 = lvl + 10
+        comp2 = 2 + ((lvl2 - 1) // 4)
+        
+        ttk.Label(exp_table, text=str(lvl2)).grid(row=lvl, column=3, padx=5, pady=2, sticky="w")
+        ttk.Label(exp_table, text=str(TABLA_EXPERIENCIA[lvl2])).grid(row=lvl, column=4, padx=5, pady=2, sticky="w")
+        ttk.Label(exp_table, text=f"+{comp2}").grid(row=lvl, column=5, padx=5, pady=2, sticky="w")
+    
+    # Función para actualizar displays de progresión
+    def actualizar_displays_progresion():
+        try:
+            nivel_actual_var.set(nivel_var.get())
+            exp_actual_var.set(experiencia_var.get())
+            
+            nivel = int(nivel_var.get())
+            if nivel < 20:
+                exp_siguiente_nivel_var.set(str(TABLA_EXPERIENCIA[nivel + 1]))
+                exp_restante_var.set(str(TABLA_EXPERIENCIA[nivel + 1] - int(experiencia_var.get())))
+            else:
+                exp_siguiente_nivel_var.set("Máximo")
+                exp_restante_var.set("Máximo")
+        except (ValueError, KeyError):
+            nivel_actual_var.set("1")
+            exp_actual_var.set("0")
+            exp_siguiente_nivel_var.set("300")
+            exp_restante_var.set("300")
+    
+    # Inicializar displays
+    actualizar_displays_progresion()
+    
+    # Vincular cambios de nivel/experiencia con actualización de displays
+    nivel_var.trace_add("write", lambda *args: actualizar_displays_progresion())
+    experiencia_var.trace_add("write", lambda *args: actualizar_displays_progresion())
+    
     # Botones de acción
     botones_frame = ttk.Frame(editar_frame)
     botones_frame.pack(fill="x", padx=20, pady=(20, 30))
@@ -845,6 +1165,34 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
                 notebook.select(1)
                 return
         
+        # Validar nivel y experiencia
+        try:
+            nivel = int(nivel_var.get())
+            experiencia = int(experiencia_var.get())
+            
+            if nivel < 1 or nivel > 20:
+                messagebox.showwarning("Advertencia", "El nivel debe estar entre 1 y 20.")
+                notebook.select(0)
+                return
+            
+            if experiencia < 0:
+                messagebox.showwarning("Advertencia", "La experiencia no puede ser negativa.")
+                notebook.select(0)
+                return
+            
+            # Verificar coherencia entre nivel y experiencia
+            if experiencia < TABLA_EXPERIENCIA[nivel]:
+                respuesta = messagebox.askyesno("Advertencia", 
+                    f"La experiencia actual ({experiencia}) es menor que la mínima requerida para el nivel {nivel} ({TABLA_EXPERIENCIA[nivel]}).\n"
+                    f"¿Desea ajustar la experiencia al mínimo requerido para el nivel {nivel}?")
+                if respuesta:
+                    experiencia = TABLA_EXPERIENCIA[nivel]
+                    experiencia_var.set(str(experiencia))
+        except ValueError:
+            messagebox.showwarning("Advertencia", "El nivel y la experiencia deben ser números.")
+            notebook.select(0)
+            return
+        
         # Recopilar datos de competencias con armas y armaduras
         comp_armaduras = [armadura for armadura, var in armadura_vars.items() if var.get()]
         comp_armas = [arma for arma, var in armas_vars.items() if var.get()]
@@ -855,6 +1203,8 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
             "nombre": nombre_var.get().strip(),
             "clase": clase_var.get(),
             "raza": raza_var.get(),
+            "nivel": nivel,
+            "experiencia": experiencia,
             "estadisticas": {stat: int(stats_vars[stat].get()) for stat in ESTADISTICAS},
             "competencias": [comp for comp, var in comp_vars.items() if var.get()],
             "comp_armaduras": comp_armaduras,

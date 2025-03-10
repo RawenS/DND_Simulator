@@ -9,7 +9,7 @@ from tkinter import ttk, messagebox, filedialog
 import json
 import os
 
-def mostrar_cargar_campana(root, directorio_campanas, callback_menu):
+def mostrar_cargar_campana(root, directorio_campanas, callback_menu, callback_cargar_campana=None):
     """
     Muestra la pantalla para cargar una campaña existente
     
@@ -17,6 +17,7 @@ def mostrar_cargar_campana(root, directorio_campanas, callback_menu):
         root: La ventana principal de la aplicación
         directorio_campanas: Directorio donde se guardan las campañas
         callback_menu: Función para volver al menú principal
+        callback_cargar_campana: Función para cargar la campaña en la aplicación principal
     """
     # Ocultar frames existentes
     for widget in root.winfo_children():
@@ -70,7 +71,8 @@ def mostrar_cargar_campana(root, directorio_campanas, callback_menu):
                         "nombre": datos.get("nombre", "Sin nombre"),
                         "ambientacion": datos.get("ambientacion", ""),
                         "jugadores": len(datos.get("jugadores", [])),
-                        "ruta": ruta
+                        "ruta": ruta,
+                        "datos_completos": datos  # Guardar todos los datos para usarlos después
                     })
     except Exception as e:
         messagebox.showerror("Error", f"Error al cargar las campañas: {str(e)}")
@@ -95,10 +97,11 @@ def mostrar_cargar_campana(root, directorio_campanas, callback_menu):
             acciones_frame = ttk.Frame(lista_frame)
             acciones_frame.grid(row=i+1, column=3, padx=5, pady=3, sticky="w")
             
-            # Ruta para la lambda
+            # Datos para la lambda
+            campana_actual = campana["datos_completos"]
             ruta = campana["ruta"]
             ttk.Button(acciones_frame, text="Cargar", 
-                      command=lambda r=ruta: cargar_detalles_campana(r)).pack(side="left", padx=2)
+                      command=lambda c=campana_actual, r=ruta: mostrar_detalles_campana(root, c, r, callback_menu, callback_cargar_campana)).pack(side="left", padx=2)
     
     def cargar_archivo():
         """Abre un diálogo para seleccionar un archivo de campaña"""
@@ -109,95 +112,12 @@ def mostrar_cargar_campana(root, directorio_campanas, callback_menu):
         )
         
         if ruta:
-            cargar_detalles_campana(ruta)
-    
-    def cargar_detalles_campana(ruta):
-        """Muestra mensaje de funcionalidad no implementada"""
-        messagebox.showinfo("Información", "La funcionalidad para cargar detalles de campaña no está completamente implementada todavía.")
-    
-    def mostrar_detalles_campana(campana, ruta):
-        """Muestra los detalles de una campaña cargada"""
-        # Ocultar frames existentes
-        for widget in root.winfo_children():
-            if isinstance(widget, ttk.Frame):
-                widget.pack_forget()
-        
-        # Crear nuevo frame para detalles
-        detalles_frame = ttk.Frame(root)
-        
-        # Título
-        titulo = ttk.Label(detalles_frame, text=f"Campaña: {campana['nombre']}", style="Title.TLabel")
-        titulo.pack(pady=(20, 10))
-        
-        # Frame para detalles
-        info_frame = ttk.Frame(detalles_frame)
-        info_frame.pack(fill="x", padx=50, pady=10)
-        
-        # Mostrar detalles básicos
-        ttk.Label(info_frame, text="Ambientación:", font=('Helvetica', 11, 'bold')).grid(row=0, column=0, sticky="w", pady=5)
-        ttk.Label(info_frame, text=campana.get("ambientacion", "No especificada")).grid(row=0, column=1, sticky="w", pady=5)
-        
-        ttk.Label(info_frame, text="Dificultad:", font=('Helvetica', 11, 'bold')).grid(row=1, column=0, sticky="w", pady=5)
-        ttk.Label(info_frame, text=campana.get("dificultad", "Normal")).grid(row=1, column=1, sticky="w", pady=5)
-        
-        # Opciones especiales
-        opciones = []
-        if campana.get("sin_muerte", False):
-            opciones.append("Sin muerte súbita")
-        if campana.get("exp_modificada", False):
-            opciones.append("Experiencia modificada")
-        
-        ttk.Label(info_frame, text="Opciones especiales:", font=('Helvetica', 11, 'bold')).grid(row=2, column=0, sticky="nw", pady=5)
-        ttk.Label(info_frame, text=", ".join(opciones) if opciones else "Ninguna").grid(row=2, column=1, sticky="w", pady=5)
-        
-        # Reglas especiales
-        ttk.Label(info_frame, text="Reglas especiales:", font=('Helvetica', 11, 'bold')).grid(row=3, column=0, sticky="nw", pady=5)
-        
-        reglas_text = tk.Text(info_frame, height=4, width=40)
-        reglas_text.grid(row=3, column=1, sticky="ew", pady=5)
-        reglas_text.insert("1.0", campana.get("reglas_especiales", ""))
-        reglas_text.config(state="disabled")
-        
-        # Lista de jugadores
-        jugadores_titulo = ttk.Label(detalles_frame, text="Jugadores", style="Subtitle.TLabel")
-        jugadores_titulo.pack(pady=(20, 10))
-        
-        jugadores_frame = ttk.Frame(detalles_frame)
-        jugadores_frame.pack(fill="both", expand=True, padx=50, pady=5)
-        
-        jugadores = campana.get("jugadores", [])
-        
-        if not jugadores:
-            ttk.Label(jugadores_frame, text="No hay jugadores en esta campaña").pack(pady=10)
-        else:
-            # Crear cabecera
-            ttk.Label(jugadores_frame, text="Nombre", font=('Helvetica', 11, 'bold')).grid(row=0, column=0, padx=5, pady=5, sticky="w")
-            ttk.Label(jugadores_frame, text="Clase", font=('Helvetica', 11, 'bold')).grid(row=0, column=1, padx=5, pady=5, sticky="w")
-            ttk.Label(jugadores_frame, text="Raza", font=('Helvetica', 11, 'bold')).grid(row=0, column=2, padx=5, pady=5, sticky="w")
-            ttk.Label(jugadores_frame, text="Nivel", font=('Helvetica', 11, 'bold')).grid(row=0, column=3, padx=5, pady=5, sticky="w")
-            
-            # Mostrar jugadores
-            for i, jugador in enumerate(jugadores):
-                ttk.Label(jugadores_frame, text=jugador.get("nombre", "")).grid(row=i+1, column=0, padx=5, pady=3, sticky="w")
-                ttk.Label(jugadores_frame, text=jugador.get("clase", "")).grid(row=i+1, column=1, padx=5, pady=3, sticky="w")
-                ttk.Label(jugadores_frame, text=jugador.get("raza", "")).grid(row=i+1, column=2, padx=5, pady=3, sticky="w")
-                ttk.Label(jugadores_frame, text=str(jugador.get("nivel", 1))).grid(row=i+1, column=3, padx=5, pady=3, sticky="w")
-        
-        # Botones de acción
-        botones_frame = ttk.Frame(detalles_frame)
-        botones_frame.pack(fill="x", padx=50, pady=(20, 30))
-        
-        def no_implementado():
-            """Función temporal para opciones no implementadas"""
-            messagebox.showinfo("Información", "No implementado")
-        
-        ttk.Button(botones_frame, text="Continuar Partida", command=no_implementado).pack(side="right", padx=5)
-        ttk.Button(botones_frame, text="Editar Campaña", command=no_implementado).pack(side="right", padx=5)
-        ttk.Button(botones_frame, text="Volver", 
-                  command=lambda: mostrar_cargar_campana(root, directorio_campanas, callback_menu)).pack(side="right", padx=5)
-        
-        # Mostrar el frame
-        detalles_frame.pack(fill="both", expand=True, padx=10, pady=10)
+            try:
+                with open(ruta, 'r', encoding='utf-8') as f:
+                    datos = json.load(f)
+                mostrar_detalles_campana(root, datos, ruta, callback_menu, callback_cargar_campana)
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al cargar el archivo: {str(e)}")
     
     # Frame para botones
     botones_frame = ttk.Frame(cargar_campana_frame)
@@ -229,3 +149,386 @@ def mostrar_cargar_campana(root, directorio_campanas, callback_menu):
     # Actualizar canvas después de que todo esté configurado
     canvas.update_idletasks()
     canvas.configure(scrollregion=canvas.bbox("all"))
+
+def mostrar_detalles_campana(root, campana, ruta, callback_menu, callback_cargar_campana=None):
+    """
+    Muestra los detalles de una campaña cargada
+    
+    Args:
+        root: La ventana principal de la aplicación
+        campana: Datos de la campaña
+        ruta: Ruta del archivo de la campaña
+        callback_menu: Función para volver al menú principal
+        callback_cargar_campana: Función para cargar la campaña en la aplicación principal
+    """
+    # Ocultar frames existentes
+    for widget in root.winfo_children():
+        if isinstance(widget, ttk.Frame):
+            widget.pack_forget()
+    
+    # Crear nuevo frame para detalles
+    detalles_frame = ttk.Frame(root)
+    detalles_frame.pack(fill="both", expand=True, padx=10, pady=10)
+    
+    # Crear canvas con scrollbar para contenido adaptable
+    canvas_detalles = tk.Canvas(detalles_frame)
+    scrollbar_detalles = ttk.Scrollbar(detalles_frame, orient="vertical", command=canvas_detalles.yview)
+    detalles_content = ttk.Frame(canvas_detalles)
+    
+    # Configurar canvas y scrollbar
+    canvas_detalles.configure(yscrollcommand=scrollbar_detalles.set)
+    canvas_detalles.pack(side="left", fill="both", expand=True)
+    scrollbar_detalles.pack(side="right", fill="y")
+    
+    # Crear ventana dentro del canvas para el frame
+    def configure_detalles_frame(event):
+        canvas_detalles.configure(scrollregion=canvas_detalles.bbox("all"))
+        canvas_detalles.itemconfig(detalles_id, width=event.width)
+    
+    detalles_id = canvas_detalles.create_window((0, 0), window=detalles_content, anchor="nw")
+    detalles_content.bind("<Configure>", configure_detalles_frame)
+    canvas_detalles.bind("<Configure>", lambda e: configure_detalles_frame(e))
+    
+    # Título
+    titulo = ttk.Label(detalles_content, text=f"Campaña: {campana['nombre']}", style="Title.TLabel")
+    titulo.pack(pady=(20, 10))
+    
+    # Frame para detalles
+    info_frame = ttk.Frame(detalles_content)
+    info_frame.pack(fill="x", padx=50, pady=10)
+    
+    # Mostrar detalles básicos
+    ttk.Label(info_frame, text="Ambientación:", font=('Helvetica', 11, 'bold')).grid(row=0, column=0, sticky="w", pady=5)
+    ttk.Label(info_frame, text=campana.get("ambientacion", "No especificada")).grid(row=0, column=1, sticky="w", pady=5)
+    
+    ttk.Label(info_frame, text="Dificultad:", font=('Helvetica', 11, 'bold')).grid(row=1, column=0, sticky="w", pady=5)
+    ttk.Label(info_frame, text=campana.get("dificultad", "Normal")).grid(row=1, column=1, sticky="w", pady=5)
+    
+    # Opciones especiales
+    opciones = []
+    if campana.get("sin_muerte", False):
+        opciones.append("Sin muerte súbita")
+    if campana.get("exp_modificada", False):
+        opciones.append("Experiencia modificada")
+    
+    ttk.Label(info_frame, text="Opciones especiales:", font=('Helvetica', 11, 'bold')).grid(row=2, column=0, sticky="nw", pady=5)
+    ttk.Label(info_frame, text=", ".join(opciones) if opciones else "Ninguna").grid(row=2, column=1, sticky="w", pady=5)
+    
+    # Reglas especiales
+    ttk.Label(info_frame, text="Reglas especiales:", font=('Helvetica', 11, 'bold')).grid(row=3, column=0, sticky="nw", pady=5)
+    
+    reglas_text = tk.Text(info_frame, height=4, width=40)
+    reglas_text.grid(row=3, column=1, sticky="ew", pady=5)
+    reglas_text.insert("1.0", campana.get("reglas_especiales", ""))
+    reglas_text.config(state="disabled")
+    
+    # Lista de jugadores
+    jugadores_titulo = ttk.Label(detalles_content, text="Jugadores", style="Subtitle.TLabel")
+    jugadores_titulo.pack(pady=(20, 10))
+    
+    jugadores_frame = ttk.Frame(detalles_content)
+    jugadores_frame.pack(fill="both", expand=True, padx=50, pady=5)
+    
+    jugadores = campana.get("jugadores", [])
+    
+    if not jugadores:
+        ttk.Label(jugadores_frame, text="No hay jugadores en esta campaña").pack(pady=10)
+    else:
+        # Crear cabecera
+        ttk.Label(jugadores_frame, text="Nombre", font=('Helvetica', 11, 'bold')).grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        ttk.Label(jugadores_frame, text="Clase", font=('Helvetica', 11, 'bold')).grid(row=0, column=1, padx=5, pady=5, sticky="w")
+        ttk.Label(jugadores_frame, text="Raza", font=('Helvetica', 11, 'bold')).grid(row=0, column=2, padx=5, pady=5, sticky="w")
+        ttk.Label(jugadores_frame, text="Nivel/XP", font=('Helvetica', 11, 'bold')).grid(row=0, column=3, padx=5, pady=5, sticky="w")
+        ttk.Label(jugadores_frame, text="Acciones", font=('Helvetica', 11, 'bold')).grid(row=0, column=4, padx=5, pady=5, sticky="w")
+        
+        # Mostrar jugadores
+        for i, jugador in enumerate(jugadores):
+            ttk.Label(jugadores_frame, text=jugador.get("nombre", "")).grid(row=i+1, column=0, padx=5, pady=3, sticky="w")
+            ttk.Label(jugadores_frame, text=jugador.get("clase", "")).grid(row=i+1, column=1, padx=5, pady=3, sticky="w")
+            ttk.Label(jugadores_frame, text=jugador.get("raza", "")).grid(row=i+1, column=2, padx=5, pady=3, sticky="w")
+            # Mostrar nivel con formato más claro e incluir experiencia
+            nivel = jugador.get("nivel", 1)
+            experiencia = jugador.get("experiencia", 0)
+            ttk.Label(jugadores_frame, text=f"Nivel {nivel} ({experiencia} XP)").grid(row=i+1, column=3, padx=5, pady=3, sticky="w")
+            
+            # Botones de acción para cada jugador
+            acciones_frame = ttk.Frame(jugadores_frame)
+            acciones_frame.grid(row=i+1, column=4, padx=5, pady=3, sticky="w")
+            
+            # Personaje actual e índice para la lambda
+            personaje_actual = jugador
+            idx = i
+            
+            ttk.Button(acciones_frame, text="Ver Detalles", 
+                      command=lambda p=personaje_actual: ver_detalles_personaje(p)).pack(side="left", padx=2)
+            
+            ttk.Button(acciones_frame, text="Editar", 
+                      command=lambda p=personaje_actual, i=idx: editar_personaje(p, i)).pack(side="left", padx=2)
+    
+    def editar_personaje(personaje, indice):
+        """Editar un personaje de la campaña"""
+        # Verificar si existe el archivo del personaje
+        archivo_personaje = personaje.get("archivo", "")
+        if not archivo_personaje:
+            messagebox.showinfo("Información", "No se encuentra la información detallada del personaje.")
+            return
+        
+        directorio_personajes = "personajes"
+        ruta_personaje = os.path.join(directorio_personajes, archivo_personaje)
+        
+        if not os.path.exists(ruta_personaje):
+            messagebox.showinfo("Información", f"El archivo del personaje '{personaje.get('nombre', '')}' no existe.")
+            return
+        
+        # Cargar datos completos del personaje
+        try:
+            with open(ruta_personaje, 'r', encoding='utf-8') as f:
+                datos_personaje = json.load(f)
+            
+            # Guardar referencia a la campaña para actualizar después
+            datos_campaña_actual = campana
+            ruta_campaña_actual = ruta
+            
+            # Función de callback para cuando se termina de editar el personaje
+            def callback_edicion():
+                # Actualizar datos del personaje en la campaña
+                try:
+                    # Recargar el personaje editado
+                    with open(ruta_personaje, 'r', encoding='utf-8') as f:
+                        personaje_actualizado = json.load(f)
+                    
+                    # Actualizar datos básicos en la campaña
+                    actualizar_personaje_en_campaña(personaje_actualizado, indice)
+                    
+                    # Volver a mostrar detalles de la campaña
+                    mostrar_detalles_campana(root, datos_campaña_actual, ruta_campaña_actual, 
+                                           callback_menu, callback_cargar_campana)
+                    
+                except Exception as e:
+                    messagebox.showerror("Error", f"Error al actualizar el personaje en la campaña: {str(e)}")
+                    mostrar_detalles_campana(root, datos_campaña_actual, ruta_campaña_actual, 
+                                           callback_menu, callback_cargar_campana)
+            
+            # Mostrar pantalla de edición de personaje
+            from modulos.gestor_personajes import mostrar_crear_editar_personaje
+            mostrar_crear_editar_personaje(root, datos_personaje, directorio_personajes, callback_edicion)
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al cargar los detalles del personaje: {str(e)}")
+    
+    def actualizar_personaje_en_campaña(personaje_actualizado, indice):
+        """Actualiza los datos del personaje en la campaña"""
+        if 0 <= indice < len(campana.get("jugadores", [])):
+            # Actualizar datos básicos necesarios
+            campana["jugadores"][indice].update({
+                "nombre": personaje_actualizado.get("nombre", ""),
+                "clase": personaje_actualizado.get("clase", ""),
+                "raza": personaje_actualizado.get("raza", ""),
+                "nivel": personaje_actualizado.get("nivel", 1),
+                "experiencia": personaje_actualizado.get("experiencia", 0),
+                "archivo": personaje_actualizado.get("archivo", ""),
+                "estadisticas": personaje_actualizado.get("estadisticas", {}),
+                "competencias": personaje_actualizado.get("competencias", [])
+            })
+            
+            # Guardar los cambios en el archivo de la campaña
+            try:
+                with open(ruta, 'w', encoding='utf-8') as f:
+                    json.dump(campana, f, ensure_ascii=False, indent=4)
+                    
+                # Mostrar mensaje de éxito
+                messagebox.showinfo("Éxito", "Personaje actualizado correctamente en la campaña.")
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al guardar los cambios en la campaña: {str(e)}")
+    
+    def ver_detalles_personaje(personaje):
+        """Muestra los detalles de un personaje"""
+        # Verificar si existe el archivo del personaje
+        archivo_personaje = personaje.get("archivo", "")
+        if not archivo_personaje:
+            messagebox.showinfo("Información", "No se encuentra la información detallada del personaje.")
+            return
+        
+        directorio_personajes = "personajes"
+        ruta_personaje = os.path.join(directorio_personajes, archivo_personaje)
+        
+        if not os.path.exists(ruta_personaje):
+            messagebox.showinfo("Información", f"El archivo del personaje '{personaje.get('nombre', '')}' no existe.")
+            return
+        
+        # Cargar datos completos del personaje
+        try:
+            with open(ruta_personaje, 'r', encoding='utf-8') as f:
+                datos_personaje = json.load(f)
+            
+            # Crear diálogo con detalles
+            dialogo = tk.Toplevel(root)
+            dialogo.title(f"Detalles de {personaje.get('nombre', '')}")
+            dialogo.geometry("600x500")
+            dialogo.transient(root)
+            dialogo.grab_set()
+            
+            # Centrar diálogo
+            dialogo.geometry("+%d+%d" % (
+                root.winfo_rootx() + (root.winfo_width() // 2) - 300,
+                root.winfo_rooty() + (root.winfo_height() // 2) - 250
+            ))
+            
+            # Frame con scroll
+            dialog_main = ttk.Frame(dialogo)
+            dialog_main.pack(fill="both", expand=True, padx=10, pady=10)
+            
+            # Canvas con scroll
+            canvas_dialogo = tk.Canvas(dialog_main)
+            scrollbar_dialogo = ttk.Scrollbar(dialog_main, orient="vertical", command=canvas_dialogo.yview)
+            contenido_dialogo = ttk.Frame(canvas_dialogo)
+            
+            canvas_dialogo.configure(yscrollcommand=scrollbar_dialogo.set)
+            canvas_dialogo.pack(side="left", fill="both", expand=True)
+            scrollbar_dialogo.pack(side="right", fill="y")
+            
+            dialogo_id = canvas_dialogo.create_window((0, 0), window=contenido_dialogo, anchor="nw")
+            
+            def configurar_dialogo(event):
+                canvas_dialogo.configure(scrollregion=canvas_dialogo.bbox("all"))
+                canvas_dialogo.itemconfig(dialogo_id, width=event.width)
+            
+            contenido_dialogo.bind("<Configure>", configurar_dialogo)
+            canvas_dialogo.bind("<Configure>", lambda e: configurar_dialogo(e))
+            
+            # Título
+            ttk.Label(contenido_dialogo, text=f"{personaje.get('nombre', '')}", 
+                     font=('Helvetica', 16, 'bold')).pack(pady=(10, 20))
+            
+            # Información básica
+            info_basica = ttk.LabelFrame(contenido_dialogo, text="Información Básica")
+            info_basica.pack(fill="x", padx=10, pady=5)
+            
+            ttk.Label(info_basica, text=f"Clase: {datos_personaje.get('clase', '')}").pack(anchor="w", padx=10, pady=2)
+            ttk.Label(info_basica, text=f"Raza: {datos_personaje.get('raza', '')}").pack(anchor="w", padx=10, pady=2)
+            ttk.Label(info_basica, text=f"Nivel: {datos_personaje.get('nivel', 1)}").pack(anchor="w", padx=10, pady=2)
+            ttk.Label(info_basica, text=f"Experiencia: {datos_personaje.get('experiencia', 0)} XP").pack(anchor="w", padx=10, pady=2)
+            
+            # Mostrar experiencia para siguiente nivel si no es nivel 20
+            nivel_actual = datos_personaje.get('nivel', 1)
+            if nivel_actual < 20:
+                # Importar tabla de experiencia o definirla aquí
+                TABLA_EXPERIENCIA = {
+                    1: 0, 2: 300, 3: 900, 4: 2700, 5: 6500, 6: 14000, 7: 23000, 8: 34000, 9: 48000, 10: 64000,
+                    11: 85000, 12: 100000, 13: 120000, 14: 140000, 15: 165000, 16: 195000, 17: 225000, 18: 265000, 19: 305000, 20: 355000
+                }
+                exp_actual = datos_personaje.get('experiencia', 0)
+                exp_siguiente = TABLA_EXPERIENCIA.get(nivel_actual + 1, 0)
+                exp_restante = exp_siguiente - exp_actual
+                ttk.Label(info_basica, text=f"Experiencia para nivel {nivel_actual + 1}: {exp_restante} XP más").pack(anchor="w", padx=10, pady=2)
+            
+            # Estadísticas
+            stats = datos_personaje.get("estadisticas", {})
+            stats_frame = ttk.LabelFrame(contenido_dialogo, text="Estadísticas")
+            stats_frame.pack(fill="x", padx=10, pady=5)
+            
+            for i, (stat, valor) in enumerate(stats.items()):
+                ttk.Label(stats_frame, text=f"{stat}: {valor}").grid(row=i//3, column=i%3, padx=10, pady=2, sticky="w")
+            
+            # Competencias
+            comp_frame = ttk.LabelFrame(contenido_dialogo, text="Competencias")
+            comp_frame.pack(fill="x", padx=10, pady=5)
+            
+            competencias = datos_personaje.get("competencias", [])
+            if competencias:
+                ttk.Label(comp_frame, text=", ".join(competencias)).pack(anchor="w", padx=10, pady=5)
+            else:
+                ttk.Label(comp_frame, text="Sin competencias").pack(anchor="w", padx=10, pady=5)
+            
+            # Valores de combate
+            combate_frame = ttk.LabelFrame(contenido_dialogo, text="Valores de Combate")
+            combate_frame.pack(fill="x", padx=10, pady=5)
+            
+            ttk.Label(combate_frame, text=f"Bonificador de Competencia: {datos_personaje.get('bonif_comp', '+2')}").pack(anchor="w", padx=10, pady=2)
+            ttk.Label(combate_frame, text=f"Ataque con Fuerza: {datos_personaje.get('ataque_fuerza', '+0')}").pack(anchor="w", padx=10, pady=2)
+            ttk.Label(combate_frame, text=f"Ataque con Destreza: {datos_personaje.get('ataque_destreza', '+0')}").pack(anchor="w", padx=10, pady=2)
+            
+            # Mostrar información de conjuros si es lanzador
+            if datos_personaje.get("cd_conjuro") and datos_personaje.get("ataque_conjuro"):
+                ttk.Label(combate_frame, text=f"CD de Conjuro: {datos_personaje.get('cd_conjuro', '10')}").pack(anchor="w", padx=10, pady=2)
+                ttk.Label(combate_frame, text=f"Ataque de Conjuro: {datos_personaje.get('ataque_conjuro', '+0')}").pack(anchor="w", padx=10, pady=2)
+            
+            # Hechizos si tiene
+            hechizos = datos_personaje.get("hechizos", [])
+            if hechizos:
+                hechizos_frame = ttk.LabelFrame(contenido_dialogo, text="Hechizos")
+                hechizos_frame.pack(fill="x", padx=10, pady=5)
+                
+                # Tabla de hechizos
+                ttk.Label(hechizos_frame, text="Nombre", width=25, font=("Helvetica", 10, "bold")).grid(row=0, column=0, padx=5, pady=5, sticky="w")
+                ttk.Label(hechizos_frame, text="Daño", width=10, font=("Helvetica", 10, "bold")).grid(row=0, column=1, padx=5, pady=5, sticky="w")
+                ttk.Label(hechizos_frame, text="Nivel", width=5, font=("Helvetica", 10, "bold")).grid(row=0, column=2, padx=5, pady=5, sticky="w")
+                
+                for i, hechizo in enumerate(hechizos):
+                    ttk.Label(hechizos_frame, text=hechizo.get("nombre", "")).grid(row=i+1, column=0, padx=5, pady=3, sticky="w")
+                    ttk.Label(hechizos_frame, text=hechizo.get("daño", "")).grid(row=i+1, column=1, padx=5, pady=3, sticky="w")
+                    ttk.Label(hechizos_frame, text=str(hechizo.get("nivel", 0))).grid(row=i+1, column=2, padx=5, pady=3, sticky="w")
+            
+            # Botón para cerrar
+            ttk.Button(contenido_dialogo, text="Cerrar", command=dialogo.destroy).pack(pady=20)
+            
+            # Permitir rueda del ratón para scroll
+            def _on_mousewheel(event):
+                canvas_dialogo.yview_scroll(int(-1*(event.delta/120)), "units")
+            
+            canvas_dialogo.bind_all("<MouseWheel>", _on_mousewheel)
+            
+            # Cuando se cierra el diálogo, desenlazar eventos
+            def on_dialog_close():
+                canvas_dialogo.unbind_all("<MouseWheel>")
+                dialogo.destroy()
+            
+            dialogo.protocol("WM_DELETE_WINDOW", on_dialog_close)
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al cargar los detalles del personaje: {str(e)}")
+    
+    # Botones de acción
+    botones_frame = ttk.Frame(detalles_content)
+    botones_frame.pack(fill="x", padx=50, pady=(20, 30))
+    
+    def continuar_campana():
+        """Función para continuar con la campaña"""
+        if callback_cargar_campana:
+            # Desenlazar eventos de scroll
+            canvas_detalles.unbind_all("<MouseWheel>")
+            # Cargar la campaña en la aplicación principal
+            callback_cargar_campana(campana, ruta)
+        else:
+            messagebox.showinfo("Información", "La función de continuar campaña no está disponible.")
+    
+    def editar_campana():
+        """Función para editar la campaña actual"""
+        # Importar función para editar campaña
+        from editores.editar_campana import mostrar_editar_campana
+        # Directorio donde se guardan las campañas
+        directorio_campanas = os.path.dirname(ruta)
+        # Desenlazar eventos de scroll
+        canvas_detalles.unbind_all("<MouseWheel>")
+        # Mostrar pantalla de edición
+        mostrar_editar_campana(root, campana, ruta, directorio_campanas, 
+                             callback_cargar_campana, callback_menu)
+    
+    def volver_lista():
+        """Vuelve a la lista de campañas"""
+        # Desenlazar eventos de scroll
+        canvas_detalles.unbind_all("<MouseWheel>")
+        # Destruir frame actual
+        detalles_frame.destroy()
+        # Mostrar lista de campañas
+        mostrar_cargar_campana(root, os.path.dirname(ruta), callback_menu, callback_cargar_campana)
+    
+    ttk.Button(botones_frame, text="Continuar Partida", command=continuar_campana).pack(side="right", padx=5)
+    ttk.Button(botones_frame, text="Editar Campaña", command=editar_campana).pack(side="right", padx=5)
+    ttk.Button(botones_frame, text="Volver", command=volver_lista).pack(side="right", padx=5)
+    
+    # Permitir rueda del ratón para scroll
+    def _on_mousewheel(event):
+        canvas_detalles.yview_scroll(int(-1*(event.delta/120)), "units")
+    
+    canvas_detalles.bind_all("<MouseWheel>", _on_mousewheel)

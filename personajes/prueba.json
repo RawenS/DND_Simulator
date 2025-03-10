@@ -2,6 +2,8 @@
     "nombre": "Prueba",
     "clase": "Bárbaro",
     "raza": "Humano",
+    "nivel": 1,
+    "experiencia": 0,
     "estadisticas": {
         "Fuerza": 15,
         "Destreza": 13,
