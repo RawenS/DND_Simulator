@@ -1,0 +1,10 @@
+{
+    "nombre": "Hola",
+    "ambientacion": "dsadsa",
+    "reglas_especiales": "dsadsadsa",
+    "sin_muerte": false,
+    "exp_modificada": true,
+    "dificultad": "Normal",
+    "jugadores": [],
+    "fecha_creacion": null
+}

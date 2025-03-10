@@ -17,8 +17,12 @@ class DnDApp:
     def __init__(self, root):
         self.root = root
         self.root.title("D&D Combat Manager")
-        self.root.geometry("800x600")
-        self.root.minsize(800, 600)
+        self.root.geometry("1024x768")
+        self.root.minsize(1024, 768)
+        
+        # Configurar columnas y filas para expansión
+        self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_rowconfigure(0, weight=1)
         
         # Configuración de estilo
         self.configurar_estilo()
@@ -85,10 +89,13 @@ class DnDApp:
             ("Simular Combate", self.no_implementado)
         ]
         
+        # Configurar el frame de botones para expansión
+        button_frame.columnconfigure(0, weight=1)
+        
         # Creación y configuración de botones
-        for texto, comando in botones:
+        for i, (texto, comando) in enumerate(botones):
             btn = ttk.Button(button_frame, text=texto, command=comando, style="Menu.TButton")
-            btn.pack(fill="x", padx=100, pady=10)
+            btn.grid(row=i, column=0, sticky="ew", padx=100, pady=10)
         
         # Versión
         version_label = ttk.Label(self.main_frame, text="Versión 0.1")

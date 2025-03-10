@@ -23,8 +23,30 @@ def mostrar_nueva_campana(root, directorio_campanas, callback_menu):
         if isinstance(widget, ttk.Frame):
             widget.pack_forget()
     
-    # Crear nuevo frame para la campaña
-    nueva_campana_frame = ttk.Frame(root)
+    # Crear nuevo frame para la campaña con scrollbar
+    main_container = ttk.Frame(root)
+    main_container.pack(fill="both", expand=True)
+    main_container.columnconfigure(0, weight=1)
+    main_container.rowconfigure(0, weight=1)
+    
+    # Crear canvas con scrollbar para manejo de contenido grande
+    canvas = tk.Canvas(main_container)
+    scrollbar = ttk.Scrollbar(main_container, orient="vertical", command=canvas.yview)
+    nueva_campana_frame = ttk.Frame(canvas)
+    
+    # Configurar canvas
+    canvas.configure(yscrollcommand=scrollbar.set)
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+    
+    # Añadir evento para redimensionar el frame en el canvas
+    def configure_frame(event):
+        canvas.configure(scrollregion=canvas.bbox("all"))
+        canvas.itemconfig(frame_id, width=event.width)
+    
+    frame_id = canvas.create_window((0, 0), window=nueva_campana_frame, anchor="nw")
+    nueva_campana_frame.bind("<Configure>", configure_frame)
+    canvas.bind("<Configure>", lambda e: configure_frame(e))
     
     # Lista de jugadores
     jugadores = []
@@ -43,6 +65,9 @@ def mostrar_nueva_campana(root, directorio_campanas, callback_menu):
     # Frame para los parámetros básicos
     params_frame = ttk.Frame(nueva_campana_frame)
     params_frame.pack(fill="x", padx=50, pady=10)
+    
+    # Configurar columnas para adaptarse al contenido
+    params_frame.columnconfigure(1, weight=1)
     
     # Nombre de la campaña
     ttk.Label(params_frame, text="Nombre de la Campaña:").grid(row=0, column=0, sticky="w", pady=5)
@@ -125,93 +150,12 @@ def mostrar_nueva_campana(root, directorio_campanas, callback_menu):
                       command=lambda idx=idx: eliminar_jugador(idx)).pack(side="left", padx=2)
     
     def eliminar_jugador(indice):
-        """Elimina un jugador de la lista"""
-        if 0 <= indice < len(jugadores):
-            del jugadores[indice]
-            actualizar_lista_jugadores()
+        """Muestra un mensaje de funcionalidad no implementada"""
+        messagebox.showinfo("Información", "Esta funcionalidad requiere el Gestor de Personajes que aún no está implementado.")
     
     def mostrar_agregar_jugador():
-        """Muestra un diálogo para agregar un jugador"""
-        dialogo = tk.Toplevel(root)
-        dialogo.title("Agregar Jugador")
-        dialogo.geometry("400x300")
-        dialogo.resizable(False, False)
-        dialogo.transient(root)
-        dialogo.grab_set()
-        
-        # Centrar la ventana
-        dialogo.geometry("+%d+%d" % (
-            root.winfo_rootx() + (root.winfo_width() // 2) - 200,
-            root.winfo_rooty() + (root.winfo_height() // 2) - 150
-        ))
-        
-        # Título
-        ttk.Label(dialogo, text="Información del Jugador", style="Header.TLabel").pack(pady=(20, 10))
-        
-        # Frame para los campos
-        campos_frame = ttk.Frame(dialogo)
-        campos_frame.pack(fill="x", padx=20, pady=10)
-        
-        # Nombre del jugador
-        ttk.Label(campos_frame, text="Nombre:").grid(row=0, column=0, sticky="w", pady=5)
-        nombre_var = tk.StringVar()
-        ttk.Entry(campos_frame, textvariable=nombre_var, width=30).grid(row=0, column=1, sticky="ew", pady=5)
-        
-        # Clase
-        ttk.Label(campos_frame, text="Clase:").grid(row=1, column=0, sticky="w", pady=5)
-        clase_var = tk.StringVar()
-        clases = ["Bárbaro", "Bardo", "Clérigo", "Druida", "Guerrero", "Mago", "Monje", 
-                 "Paladín", "Explorador", "Pícaro", "Hechicero", "Brujo"]
-        ttk.Combobox(campos_frame, textvariable=clase_var, values=clases, width=28).grid(row=1, column=1, sticky="ew", pady=5)
-        
-        # Raza
-        ttk.Label(campos_frame, text="Raza:").grid(row=2, column=0, sticky="w", pady=5)
-        raza_var = tk.StringVar()
-        razas = ["Humano", "Elfo", "Enano", "Halfling", "Gnomo", "Semielfo", "Semiorco", "Tiefling", "Draconido"]
-        ttk.Combobox(campos_frame, textvariable=raza_var, values=razas, width=28).grid(row=2, column=1, sticky="ew", pady=5)
-        
-        # Nivel
-        ttk.Label(campos_frame, text="Nivel:").grid(row=3, column=0, sticky="w", pady=5)
-        nivel_var = tk.StringVar(value="1")
-        ttk.Spinbox(campos_frame, from_=1, to=20, textvariable=nivel_var, width=5).grid(row=3, column=1, sticky="w", pady=5)
-        
-        # Botones
-        botones_frame = ttk.Frame(dialogo)
-        botones_frame.pack(fill="x", padx=20, pady=(20, 10))
-        
-        def agregar():
-            # Validar campos
-            if not nombre_var.get().strip():
-                messagebox.showwarning("Advertencia", "Debe ingresar un nombre.")
-                return
-            
-            if not clase_var.get():
-                messagebox.showwarning("Advertencia", "Debe seleccionar una clase.")
-                return
-            
-            if not raza_var.get():
-                messagebox.showwarning("Advertencia", "Debe seleccionar una raza.")
-                return
-            
-            # Crear jugador
-            jugador = {
-                "nombre": nombre_var.get().strip(),
-                "clase": clase_var.get(),
-                "raza": raza_var.get(),
-                "nivel": int(nivel_var.get())
-            }
-            
-            # Añadir a la lista
-            jugadores.append(jugador)
-            
-            # Actualizar lista
-            actualizar_lista_jugadores()
-            
-            # Cerrar diálogo
-            dialogo.destroy()
-        
-        ttk.Button(botones_frame, text="Agregar", command=agregar).pack(side="right", padx=5)
-        ttk.Button(botones_frame, text="Cancelar", command=dialogo.destroy).pack(side="right", padx=5)
+        """Muestra un mensaje de funcionalidad no implementada"""
+        messagebox.showinfo("Información", "Esta funcionalidad requiere el Gestor de Personajes que aún no está implementado. Debe crear los personajes primero para poder agregarlos a la campaña.")
     
     # Frame para agregar jugadores
     agregar_frame = ttk.Frame(nueva_campana_frame)
@@ -255,6 +199,9 @@ def mostrar_nueva_campana(root, directorio_campanas, callback_menu):
                 json.dump(campana, f, ensure_ascii=False, indent=4)
             
             messagebox.showinfo("Éxito", f"Campaña '{nombre_campana.get()}' guardada correctamente.")
+            # Limpiar correctamente al guardar
+            canvas.unbind_all("<MouseWheel>")
+            main_container.destroy()
             callback_menu()  # Volver al menú principal
         except Exception as e:
             messagebox.showerror("Error", f"Error al guardar la campaña: {str(e)}")
@@ -263,8 +210,29 @@ def mostrar_nueva_campana(root, directorio_campanas, callback_menu):
     botones_frame = ttk.Frame(nueva_campana_frame)
     botones_frame.pack(fill="x", padx=50, pady=(20, 30))
     
-    ttk.Button(botones_frame, text="Guardar Campaña", command=guardar_campana).pack(side="right", padx=5)
-    ttk.Button(botones_frame, text="Volver al Menú", command=callback_menu).pack(side="right", padx=5)
+    # Función modificada para asegurar la limpieza adecuada
+    def volver_menu():
+        # Desenlazar eventos de scroll
+        canvas.unbind_all("<MouseWheel>")
+        # Destruir el contenedor principal por completo
+        main_container.destroy()
+        # Llamar al callback del menú principal
+        callback_menu()
     
-    # Mostrar el frame
-    nueva_campana_frame.pack(fill="both", expand=True, padx=10, pady=10)
+    ttk.Button(botones_frame, text="Guardar Campaña", command=guardar_campana).pack(side="right", padx=5)
+    ttk.Button(botones_frame, text="Volver al Menú", command=volver_menu).pack(side="right", padx=5)
+    
+    # Añadir atajos de teclado para navegación con scroll
+    def _on_mousewheel(event):
+        canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+    
+    canvas.bind_all("<MouseWheel>", _on_mousewheel)
+    
+    # Configurar el tamaño mínimo del canvas
+    canvas.update_idletasks()
+    min_width = max(800, nueva_campana_frame.winfo_reqwidth())
+    min_height = max(600, nueva_campana_frame.winfo_reqheight())
+    canvas.config(width=min_width, height=min_height)
+    
+    # Actualizar el scrollregion
+    canvas.configure(scrollregion=canvas.bbox("all"))

@@ -23,8 +23,28 @@ def mostrar_cargar_campana(root, directorio_campanas, callback_menu):
         if isinstance(widget, ttk.Frame):
             widget.pack_forget()
     
-    # Crear nuevo frame para cargar campaña
-    cargar_campana_frame = ttk.Frame(root)
+    # Crear contenedor principal con scrollbar
+    main_container = ttk.Frame(root)
+    main_container.pack(fill="both", expand=True)
+    
+    # Crear canvas con scrollbar para contenido adaptable
+    canvas = tk.Canvas(main_container)
+    scrollbar = ttk.Scrollbar(main_container, orient="vertical", command=canvas.yview)
+    cargar_campana_frame = ttk.Frame(canvas)
+    
+    # Configurar canvas y scrollbar
+    canvas.configure(yscrollcommand=scrollbar.set)
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+    
+    # Crear ventana dentro del canvas para el frame
+    def configure_frame(event):
+        canvas.configure(scrollregion=canvas.bbox("all"))
+        canvas.itemconfig(frame_id, width=event.width)
+    
+    frame_id = canvas.create_window((0, 0), window=cargar_campana_frame, anchor="nw")
+    cargar_campana_frame.bind("<Configure>", configure_frame)
+    canvas.bind("<Configure>", lambda e: configure_frame(e))
     
     # Título
     titulo = ttk.Label(cargar_campana_frame, text="Cargar Campaña", style="Title.TLabel")
@@ -33,6 +53,10 @@ def mostrar_cargar_campana(root, directorio_campanas, callback_menu):
     # Frame para la lista de campañas
     lista_frame = ttk.Frame(cargar_campana_frame)
     lista_frame.pack(fill="both", expand=True, padx=50, pady=10)
+    
+    # Configurar grid para que se expanda
+    for i in range(4):  # 4 columnas
+        lista_frame.columnconfigure(i, weight=1)
     
     # Obtener lista de campañas guardadas
     campanas = []
@@ -88,15 +112,8 @@ def mostrar_cargar_campana(root, directorio_campanas, callback_menu):
             cargar_detalles_campana(ruta)
     
     def cargar_detalles_campana(ruta):
-        """Carga los detalles de una campaña seleccionada"""
-        try:
-            with open(ruta, 'r', encoding='utf-8') as f:
-                campana = json.load(f)
-            
-            # Mostrar detalles de la campaña
-            mostrar_detalles_campana(campana, ruta)
-        except Exception as e:
-            messagebox.showerror("Error", f"Error al cargar la campaña: {str(e)}")
+        """Muestra mensaje de funcionalidad no implementada"""
+        messagebox.showinfo("Información", "La funcionalidad para cargar detalles de campaña no está completamente implementada todavía.")
     
     def mostrar_detalles_campana(campana, ruta):
         """Muestra los detalles de una campaña cargada"""
@@ -182,13 +199,33 @@ def mostrar_cargar_campana(root, directorio_campanas, callback_menu):
         # Mostrar el frame
         detalles_frame.pack(fill="both", expand=True, padx=10, pady=10)
     
+    # Frame para botones
+    botones_frame = ttk.Frame(cargar_campana_frame)
+    botones_frame.pack(fill="x", padx=50, pady=10)
+    
+    # Función modificada para asegurar la limpieza adecuada
+    def volver_menu():
+        # Desenlazar eventos de scroll
+        canvas.unbind_all("<MouseWheel>")
+        # Destruir el contenedor principal por completo
+        main_container.destroy()
+        # Llamar al callback del menú principal
+        callback_menu()
+    
     # Botón para cargar desde archivo
-    ttk.Button(cargar_campana_frame, text="Cargar desde archivo", 
-              command=cargar_archivo).pack(pady=10)
+    ttk.Button(botones_frame, text="Cargar desde archivo", 
+              command=cargar_archivo).pack(side="left", padx=5, pady=10)
     
     # Botón para volver al menú
-    ttk.Button(cargar_campana_frame, text="Volver al Menú", 
-              command=callback_menu).pack(pady=(10, 30))
+    ttk.Button(botones_frame, text="Volver al Menú", 
+              command=volver_menu).pack(side="right", padx=5, pady=10)
     
-    # Mostrar el frame
-    cargar_campana_frame.pack(fill="both", expand=True, padx=10, pady=10)
+    # Añadir atajos de teclado para navegación con scroll
+    def _on_mousewheel(event):
+        canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+    
+    canvas.bind_all("<MouseWheel>", _on_mousewheel)
+    
+    # Actualizar canvas después de que todo esté configurado
+    canvas.update_idletasks()
+    canvas.configure(scrollregion=canvas.bbox("all"))
