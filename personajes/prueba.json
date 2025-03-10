@@ -1,0 +1,36 @@
+{
+    "nombre": "Prueba",
+    "clase": "Bárbaro",
+    "raza": "Humano",
+    "estadisticas": {
+        "Fuerza": 15,
+        "Destreza": 13,
+        "Constitución": 13,
+        "Inteligencia": 8,
+        "Sabiduría": 8,
+        "Carisma": 12
+    },
+    "competencias": [
+        "Engaño",
+        "Sigilo"
+    ],
+    "comp_armaduras": [
+        "Ligeras",
+        "Medias",
+        "Pesadas",
+        "Escudos"
+    ],
+    "comp_armas": [
+        "Simples"
+    ],
+    "armas_especificas": "",
+    "inventario": [],
+    "equipamiento": {},
+    "hechizos": [],
+    "bonif_comp": "+2",
+    "cd_conjuro": "9",
+    "ataque_conjuro": "+1",
+    "ataque_fuerza": "+4",
+    "ataque_destreza": "+3",
+    "archivo": "prueba.json"
+}

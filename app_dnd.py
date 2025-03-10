@@ -12,6 +12,7 @@ import os
 # Importar módulos propios
 from modulos.nueva_campana import mostrar_nueva_campana
 from modulos.cargar_campana import mostrar_cargar_campana
+from modulos.gestor_personajes import mostrar_gestor_personajes
 
 class DnDApp:
     def __init__(self, root):
@@ -83,7 +84,7 @@ class DnDApp:
         botones = [
             ("Nueva Campaña", lambda: mostrar_nueva_campana(self.root, self.directorio_campanas, self.mostrar_menu_principal)),
             ("Cargar Campaña", lambda: mostrar_cargar_campana(self.root, self.directorio_campanas, self.mostrar_menu_principal)),
-            ("Gestor de Personajes", self.no_implementado),
+            ("Gestor de Personajes", lambda: mostrar_gestor_personajes(self.root, self.mostrar_menu_principal)),
             ("Gestor de Monstruos", self.no_implementado),
             ("DM Panel", self.no_implementado),
             ("Simular Combate", self.no_implementado)
