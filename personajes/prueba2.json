@@ -1,0 +1,36 @@
+{
+    "nombre": "Prueba2",
+    "clase": "Explorador",
+    "raza": "Semielfo",
+    "nivel": 4,
+    "experiencia": 2700,
+    "estadisticas": {
+        "Fuerza": 10,
+        "Destreza": 10,
+        "Constitución": 10,
+        "Inteligencia": 10,
+        "Sabiduría": 10,
+        "Carisma": 10
+    },
+    "competencias": [
+        "Investigación",
+        "Perspicacia"
+    ],
+    "comp_armaduras": [
+        "Ligeras",
+        "Medias"
+    ],
+    "comp_armas": [
+        "Simples"
+    ],
+    "armas_especificas": "",
+    "inventario": [],
+    "equipamiento": {},
+    "hechizos": [],
+    "bonif_comp": "+2",
+    "cd_conjuro": "10",
+    "ataque_conjuro": "+2",
+    "ataque_fuerza": "+2",
+    "ataque_destreza": "+2",
+    "archivo": "prueba2.json"
+}
