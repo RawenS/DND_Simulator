@@ -820,8 +820,54 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
     
     def mostrar_form_hechizo():
         """Muestra el formulario para añadir un hechizo"""
+        try:
+            # Importar gestor de hechizos y selector
+            from editores.gestor_hechizos import mostrar_selector_hechizos_para_personaje
+            from conectores.conector_hechizos import mostrar_selector_hechizos_personaje
+            
+            # Obtener clase actual
+            clase_actual = clase_var.get()
+            
+            # Verificar si la clase puede usar magia
+            if clase_actual not in CLASES_MAGICAS:
+                messagebox.showinfo("Información", 
+                                   f"La clase {clase_actual} no puede lanzar hechizos.")
+                return
+            
+            # Crear diccionario temporal del personaje para el selector
+            personaje_temp = {
+                "nombre": nombre_var.get(),
+                "clase": clase_actual,
+                "nivel": int(nivel_var.get()),
+                "hechizos": hechizos  # Lista actual de hechizos
+            }
+            
+            # Mostrar selector de hechizos
+            def procesar_seleccion(hechizos_seleccionados):
+                # Reemplazar la lista de hechizos con los seleccionados
+                global hechizos
+                hechizos = hechizos_seleccionados
+                # Actualizar tabla
+                actualizar_tabla_hechizos()
+            
+            # Intentar usar el selector avanzado primero
+            try:
+                mostrar_selector_hechizos_personaje(root, personaje_temp, procesar_seleccion)
+            except ImportError:
+                # Si no está disponible, usar la versión básica
+                try:
+                    mostrar_selector_hechizos_para_personaje(root, clase_actual, procesar_seleccion)
+                except ImportError:
+                    # Si tampoco está disponible, usar el formulario manual
+                    mostrar_form_hechizo_manual()
+        except ImportError:
+            # Si no están disponibles los módulos avanzados, usar el formulario manual
+            mostrar_form_hechizo_manual()
+
+    def mostrar_form_hechizo_manual():
+        """Muestra el formulario manual para añadir un hechizo"""
         dialogo = tk.Toplevel(root)
-        dialogo.title("Añadir Hechizo")
+        dialogo.title("Añadir Hechizo Manualmente")
         dialogo.geometry("400x350")
         dialogo.resizable(False, False)
         dialogo.transient(root)
@@ -911,6 +957,7 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
             }
             
             # Añadir a la lista
+            global hechizos
             hechizos.append(hechizo)
             
             # Actualizar tabla
