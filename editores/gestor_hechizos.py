@@ -1946,3 +1946,11 @@ if __name__ == "__main__":
             
             if resultado['curacion']['resultado'] > 0:
                 print(f"Curación: {resultado['curacion']['resultado']} puntos de golpe")
+
+                inicializar_directorios()
+# Verificar si hay hechizos y crear ejemplos si está vacío
+hechizos = cargar_hechizos()
+if sum(len(nivel) for nivel in hechizos.values()) == 0:
+    print("Base de datos de hechizos vacía, creando hechizos de ejemplo...")
+    crear_hechizos_ejemplo()
+    print("Hechizos de ejemplo creados correctamente.")

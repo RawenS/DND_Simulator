@@ -6,9 +6,11 @@ Módulo para integrar el gestor de hechizos con el gestor de personajes.
 
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
-import os
 import json
-from . import gestor_hechizos
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from editores import gestor_hechizos
 
 def mostrar_selector_hechizos_personaje(root, personaje, callback_seleccion):
     """

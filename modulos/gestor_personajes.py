@@ -819,10 +819,16 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
             actualizar_tabla_hechizos()
     
     def mostrar_form_hechizo():
-        """Muestra el formulario para añadir un hechizo"""
+        """Muestra el selector de hechizos"""
+        # Importar el conector directamente
+        import sys
+        import os
+        
+        # Añadir las rutas correctas al path
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        
         try:
-            # Importar gestor de hechizos y selector
-            from editores.gestor_hechizos import mostrar_selector_hechizos_para_personaje
+            # Importación específica con rutas completas
             from conectores.conector_hechizos import mostrar_selector_hechizos_personaje
             
             # Obtener clase actual
@@ -839,31 +845,26 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
                 "nombre": nombre_var.get(),
                 "clase": clase_actual,
                 "nivel": int(nivel_var.get()),
+                "estadisticas": {stat: int(stats_vars[stat].get()) for stat in ESTADISTICAS},
                 "hechizos": hechizos  # Lista actual de hechizos
             }
             
-            # Mostrar selector de hechizos
-            def procesar_seleccion(hechizos_seleccionados):
-                # Reemplazar la lista de hechizos con los seleccionados
-                global hechizos
-                hechizos = hechizos_seleccionados
-                # Actualizar tabla
-                actualizar_tabla_hechizos()
+            # Mostrar selector directamente
+            mostrar_selector_hechizos_personaje(root, personaje_temp, 
+                                               lambda selected: actualizar_con_seleccion(selected))
             
-            # Intentar usar el selector avanzado primero
-            try:
-                mostrar_selector_hechizos_personaje(root, personaje_temp, procesar_seleccion)
-            except ImportError:
-                # Si no está disponible, usar la versión básica
-                try:
-                    mostrar_selector_hechizos_para_personaje(root, clase_actual, procesar_seleccion)
-                except ImportError:
-                    # Si tampoco está disponible, usar el formulario manual
-                    mostrar_form_hechizo_manual()
-        except ImportError:
-            # Si no están disponibles los módulos avanzados, usar el formulario manual
+        except Exception as e:
+            # Si hay cualquier error, mostrar información y caer al formulario manual
+            print(f"Error al cargar selector de hechizos: {str(e)}")
+            # En caso de error, usar el formulario manual
             mostrar_form_hechizo_manual()
-
+    
+    def actualizar_con_seleccion(hechizos_seleccionados):
+        """Actualiza la lista de hechizos con los seleccionados"""
+        global hechizos
+        hechizos = hechizos_seleccionados
+        actualizar_tabla_hechizos()
+    
     def mostrar_form_hechizo_manual():
         """Muestra el formulario manual para añadir un hechizo"""
         dialogo = tk.Toplevel(root)

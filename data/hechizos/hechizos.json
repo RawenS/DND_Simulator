@@ -1,0 +1,229 @@
+{
+    "0": [
+        {
+            "nombre": "Mano Mágica",
+            "nivel": 0,
+            "escuela": "Conjuración",
+            "tiempo_lanzamiento": "1 acción",
+            "alcance": "30 pies",
+            "componentes": "V, S",
+            "duracion": "1 minuto",
+            "tipo_ataque": "Ninguno",
+            "requiere_salvacion": false,
+            "tipo_salvacion": "Ninguna",
+            "efecto_salvacion": "Ningún daño",
+            "daño_base": "",
+            "tipo_daño": "Ninguno",
+            "curacion_base": "",
+            "daño_nivel_superior": "",
+            "curacion_nivel_superior": "",
+            "clases": [
+                "Bardo",
+                "Brujo",
+                "Mago",
+                "Hechicero"
+            ],
+            "descripcion": "Una mano espectral flotante aparece en un punto que elijas dentro del alcance. La mano dura mientras dure el conjuro o hasta que la descartes como una acción. La mano se desvanece si está alguna vez a más de 30 pies de ti o si vuelves a lanzar este conjuro.\n\nPuedes usar tu acción para controlar la mano. Puedes usarla para manipular un objeto, abrir una puerta o un contenedor cerrado sin llave, guardar o recuperar un objeto de un contenedor abierto, o verter el contenido de un vial. Puedes mover la mano hasta 30 pies cada vez que la usas.\n\nLa mano no puede atacar, activar objetos mágicos o llevar más de 10 libras."
+        },
+        {
+            "nombre": "Rayo de Escarcha",
+            "nivel": 0,
+            "escuela": "Evocación",
+            "tiempo_lanzamiento": "1 acción",
+            "alcance": "60 pies",
+            "componentes": "V, S",
+            "duracion": "Instantáneo",
+            "tipo_ataque": "A distancia",
+            "requiere_salvacion": false,
+            "tipo_salvacion": "Ninguna",
+            "efecto_salvacion": "Ningún daño",
+            "daño_base": "1d8",
+            "tipo_daño": "Frío",
+            "curacion_base": "",
+            "daño_nivel_superior": "",
+            "curacion_nivel_superior": "",
+            "clases": [
+                "Mago",
+                "Hechicero"
+            ],
+            "descripcion": "Un rayo frío de luz azul pálido se dispara hacia una criatura dentro del alcance. Realiza un ataque de hechizo a distancia contra el objetivo. Si impacta, el objetivo recibe 1d8 de daño por frío, y su velocidad se reduce en 10 pies hasta el comienzo de tu siguiente turno.\nEl daño del hechizo aumenta en 1d8 cuando alcanzas el nivel 5 (2d8), el nivel 11 (3d8) y el nivel 17 (4d8)."
+        }
+    ],
+    "1": [
+        {
+            "nombre": "Curar Heridas",
+            "nivel": 1,
+            "escuela": "Evocación",
+            "tiempo_lanzamiento": "1 acción",
+            "alcance": "Toque",
+            "componentes": "V, S",
+            "duracion": "Instantáneo",
+            "tipo_ataque": "Ninguno",
+            "requiere_salvacion": false,
+            "tipo_salvacion": "Ninguna",
+            "efecto_salvacion": "Ningún daño",
+            "daño_base": "",
+            "tipo_daño": "Ninguno",
+            "curacion_base": "1d8+4",
+            "daño_nivel_superior": "",
+            "curacion_nivel_superior": "1d8",
+            "clases": [
+                "Bardo",
+                "Clérigo",
+                "Druida",
+                "Paladín",
+                "Explorador"
+            ],
+            "descripcion": "Una criatura que tocas recupera un número de puntos de golpe igual a 1d8 + tu modificador de característica de lanzamiento de conjuros. Este hechizo no tiene efecto sobre no muertos o constructos.\nA niveles superiores: Cuando lanzas este hechizo usando un espacio de conjuro de nivel 2 o superior, la cantidad de curación aumenta en 1d8 por cada nivel por encima de 1."
+        },
+        {
+            "nombre": "Proyectil Mágico",
+            "nivel": 1,
+            "escuela": "Evocación",
+            "tiempo_lanzamiento": "1 acción",
+            "alcance": "120 pies",
+            "componentes": "V, S",
+            "duracion": "Instantáneo",
+            "tipo_ataque": "Ninguno",
+            "requiere_salvacion": false,
+            "tipo_salvacion": "Ninguna",
+            "efecto_salvacion": "Ningún daño",
+            "daño_base": "1d4+1",
+            "tipo_daño": "Fuerza",
+            "curacion_base": "",
+            "daño_nivel_superior": "1d4+1",
+            "curacion_nivel_superior": "",
+            "clases": [
+                "Mago",
+                "Hechicero"
+            ],
+            "descripcion": "Creas tres dardos brillantes de fuerza mágica. Cada dardo impacta a una criatura que puedas ver dentro del alcance. Un dardo inflige 1d4+1 de daño por fuerza a su objetivo. Los dardos impactan todos simultáneamente, y puedes dirigirlos para que impacten a una criatura o a varias.\nA niveles superiores: Cuando lanzas este hechizo usando un espacio de conjuro de nivel 2 o superior, el hechizo crea un dardo adicional por cada nivel por encima de 1."
+        },
+        {
+            "nombre": "Escudo",
+            "nivel": 1,
+            "escuela": "Abjuración",
+            "tiempo_lanzamiento": "1 reacción",
+            "alcance": "Personal",
+            "componentes": "V, S",
+            "duracion": "1 round",
+            "tipo_ataque": "Ninguno",
+            "requiere_salvacion": false,
+            "tipo_salvacion": "Ninguna",
+            "efecto_salvacion": "Ningún daño",
+            "daño_base": "",
+            "tipo_daño": "Ninguno",
+            "curacion_base": "",
+            "daño_nivel_superior": "",
+            "curacion_nivel_superior": "",
+            "clases": [
+                "Mago",
+                "Hechicero"
+            ],
+            "descripcion": "Una barrera invisible de fuerza mágica aparece y te protege. Hasta el comienzo de tu siguiente turno, tienes un bonificador +5 a la CA, incluyendo contra el ataque que desencadenó el hechizo, y no recibes daño de Proyectil Mágico."
+        }
+    ],
+    "2": [],
+    "3": [
+        {
+            "nombre": "Bola de Fuego",
+            "nivel": 3,
+            "escuela": "Evocación",
+            "tiempo_lanzamiento": "1 acción",
+            "alcance": "150 pies",
+            "componentes": "V, S, M (una pequeña bola de guano de murciélago y azufre)",
+            "duracion": "Instantáneo",
+            "tipo_ataque": "Ninguno",
+            "requiere_salvacion": true,
+            "tipo_salvacion": "Destreza",
+            "efecto_salvacion": "Mitad de daño",
+            "daño_base": "8d6",
+            "tipo_daño": "Fuego",
+            "curacion_base": "",
+            "daño_nivel_superior": "1d6",
+            "curacion_nivel_superior": "",
+            "clases": [
+                "Mago",
+                "Hechicero"
+            ],
+            "descripcion": "Un rayo brillante se dispara desde tu dedo índice hasta un punto que elijas dentro del alcance, para después explotar en llamas con un sordo rugido. Todas las criaturas en una esfera de 20 pies de radio centrada en ese punto deben hacer una tirada de salvación de Destreza. Un objetivo recibe 8d6 de daño por fuego si falla la tirada, o la mitad de daño si tiene éxito.\nEl fuego se extiende rodeando esquinas. Prende fuego a objetos inflamables en el área que no estén siendo llevados o transportados."
+        }
+    ],
+    "4": [],
+    "5": [
+        {
+            "nombre": "Curación Masiva",
+            "nivel": 5,
+            "escuela": "Evocación",
+            "tiempo_lanzamiento": "1 acción",
+            "alcance": "60 pies",
+            "componentes": "V, S",
+            "duracion": "Instantáneo",
+            "tipo_ataque": "Ninguno",
+            "requiere_salvacion": false,
+            "tipo_salvacion": "Ninguna",
+            "efecto_salvacion": "Ningún daño",
+            "daño_base": "",
+            "tipo_daño": "Ninguno",
+            "curacion_base": "3d8+5",
+            "daño_nivel_superior": "",
+            "curacion_nivel_superior": "1d8",
+            "clases": [
+                "Clérigo",
+                "Druida"
+            ],
+            "descripcion": "Una oleada de energía curativa emana de ti hacia las criaturas heridas que te rodean. Recuperas hasta seis criaturas que puedas ver dentro del alcance. Cada objetivo recupera puntos de golpe igual a 3d8 + tu modificador de característica de lanzamiento de conjuros.\nEste hechizo no tiene efecto sobre no muertos o constructos.\nA niveles superiores: Cuando lanzas este hechizo usando un espacio de hechizo de nivel 6 o superior, la curación aumenta en 1d8 por cada nivel por encima de 5."
+        }
+    ],
+    "6": [
+        {
+            "nombre": "Desintegrar",
+            "nivel": 6,
+            "escuela": "Transmutación",
+            "tiempo_lanzamiento": "1 acción",
+            "alcance": "60 pies",
+            "componentes": "V, S, M (un imán y una pizca de polvo)",
+            "duracion": "Instantáneo",
+            "tipo_ataque": "Ninguno",
+            "requiere_salvacion": true,
+            "tipo_salvacion": "Destreza",
+            "efecto_salvacion": "Ningún daño",
+            "daño_base": "10d6+40",
+            "tipo_daño": "Fuerza",
+            "curacion_base": "",
+            "daño_nivel_superior": "3d6",
+            "curacion_nivel_superior": "",
+            "clases": [
+                "Mago",
+                "Hechicero"
+            ],
+            "descripcion": "Un fino rayo verde brota de tu dedo índice hacia un objetivo que puedas ver dentro del alcance. El objetivo puede ser una criatura, un objeto o una creación de fuerza mágica, como un muro creado por Muro de Fuerza.\nUna criatura a la que se dirige este hechizo debe hacer una tirada de salvación de Destreza. Si falla, el objetivo sufre 10d6 + 40 de daño por fuerza. Si este daño reduce los puntos de golpe del objetivo a 0, éste es desintegrado.\nUn objetivo desintegrado y todo lo que lleva puesto y transporta, excepto los objetos mágicos, se reduce a un montón de fino polvo gris. La criatura solo puede ser devuelta a la vida mediante los hechizos Resurrección Verdadera o Deseo.\nEste hechizo desintegra automáticamente un objeto no mágico de tamaño Grande o menor o una creación de fuerza mágica. Si el objetivo es un objeto no mágico de tamaño Enorme o mayor, este hechizo desintegra una porción de 10 pies cúbicos de él.\nA niveles superiores: Cuando lanzas este hechizo usando un espacio de hechizo de nivel 7 o superior, el daño aumenta en 3d6 por cada nivel por encima de 6."
+        }
+    ],
+    "7": [
+        {
+            "nombre": "Palabra Sagrada",
+            "nivel": 7,
+            "escuela": "Evocación",
+            "tiempo_lanzamiento": "1 acción adicional",
+            "alcance": "30 pies",
+            "componentes": "V",
+            "duracion": "Instantáneo",
+            "tipo_ataque": "Ninguno",
+            "requiere_salvacion": true,
+            "tipo_salvacion": "Carisma",
+            "efecto_salvacion": "Ningún daño",
+            "daño_base": "",
+            "tipo_daño": "Ninguno",
+            "curacion_base": "",
+            "daño_nivel_superior": "",
+            "curacion_nivel_superior": "",
+            "clases": [
+                "Clérigo"
+            ],
+            "descripcion": "Pronuncias una palabra sagrada, imbuida de poder que puede obligar a aquellos que te escuchan a arrodillarse ante ti. Cualquier criatura que elijas y que pueda oírte y esté a 30 pies de ti debe realizar una tirada de salvación de Carisma. Dependiendo de los puntos de golpe actuales de la criatura, esto produce diferentes efectos:\n- 50 PG o menos: sordo durante 1 minuto\n- 40 PG o menos: sordo y cegado durante 10 minutos\n- 30 PG o menos: sordo, cegado y aturdido durante 1 hora\n- 20 PG o menos: muerto instantáneamente\nCualquier celestial es inmune a este hechizo."
+        }
+    ],
+    "8": [],
+    "9": []
+}
