@@ -103,7 +103,7 @@ def mostrar_gestor_personajes(root, callback_menu):
     lista_frame.pack(fill="both", expand=True, padx=50, pady=10)
     
     # Configurar grid para que se expanda
-    for i in range(7):  # 7 columnas (añadida columna para nivel/XP)
+    for i in range(7):  # 7 columnas
         lista_frame.columnconfigure(i, weight=1)
     
     # Obtener lista de personajes guardados
@@ -469,11 +469,11 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
     conjuro_frame.grid(row=len(ESTADISTICAS)+1, column=0, columnspan=4, sticky="w", padx=10, pady=10)
     
     ttk.Label(conjuro_frame, text="CD de Conjuro:").grid(row=0, column=0, sticky="w", padx=5, pady=2)
-    cd_conjuro_var = tk.StringVar(value=personaje.get("cd_conjuro", "10") if personaje else "10")
+    cd_conjuro_var = tk.StringVar(value="10")
     ttk.Label(conjuro_frame, textvariable=cd_conjuro_var, width=3).grid(row=0, column=1, sticky="w", padx=5, pady=2)
     
     ttk.Label(conjuro_frame, text="Bonificador de Conjuro:").grid(row=1, column=0, sticky="w", padx=5, pady=2)
-    ataque_conjuro_var = tk.StringVar(value=personaje.get("ataque_conjuro", "+0") if personaje else "+0")
+    ataque_conjuro_var = tk.StringVar(value="+0")
     ttk.Label(conjuro_frame, textvariable=ataque_conjuro_var, width=3).grid(row=1, column=1, sticky="w", padx=5, pady=2)
     
     # Nota sobre tiradas manuales
@@ -598,11 +598,11 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
     ataques_frame.pack(fill="x", padx=10, pady=10)
     
     ttk.Label(ataques_frame, text="Ataque con Fuerza:").grid(row=0, column=0, sticky="w", padx=10, pady=5)
-    ataque_fuerza_var = tk.StringVar(value=personaje.get("ataque_fuerza", "+0") if personaje else "+0")
+    ataque_fuerza_var = tk.StringVar(value="+0")
     ttk.Label(ataques_frame, textvariable=ataque_fuerza_var, width=5).grid(row=0, column=1, sticky="w", padx=5, pady=5)
     
     ttk.Label(ataques_frame, text="Ataque con Destreza:").grid(row=1, column=0, sticky="w", padx=10, pady=5)
-    ataque_destreza_var = tk.StringVar(value=personaje.get("ataque_destreza", "+0") if personaje else "+0")
+    ataque_destreza_var = tk.StringVar(value="+0")
     ttk.Label(ataques_frame, textvariable=ataque_destreza_var, width=5).grid(row=1, column=1, sticky="w", padx=5, pady=5)
     
     # Nota informativa sobre tiradas manuales
@@ -684,7 +684,9 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
     equip_slots = ttk.Frame(equip_frame)
     equip_slots.pack(pady=10)
     
-    slots = ["Armadura", "Escudo", "Anillo 1", "Anillo 2", "Amuleto"]
+    slots = ["Casco", "Armadura", "Escudo", "Anillo 1", "Anillo 2", "Amuleto"]
+    slots_ca = {}  # Diccionario para almacenar variables de CA por slot
+    
     for slot in slots:
         slot_frame = ttk.Frame(equip_slots)
         slot_frame.pack(side="left", padx=10, pady=5)
@@ -692,6 +694,19 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
         ttk.Label(slot_frame, text=slot).pack()
         ttk.Button(slot_frame, text="Equipar", command=lambda: messagebox.showinfo("Información", "No implementado")).pack(fill="x", pady=2)
         ttk.Button(slot_frame, text="Desequipar", command=lambda: messagebox.showinfo("Información", "No implementado")).pack(fill="x", pady=2)
+        
+        # Etiqueta para mostrar la CA del ítem
+        slots_ca[slot] = tk.StringVar(value="0")
+        ttk.Label(slot_frame, text="CA:").pack(pady=(5, 0))
+        ttk.Label(slot_frame, textvariable=slots_ca[slot], width=3).pack()
+    
+    # Frame para CA total
+    ca_total_frame = ttk.Frame(equip_frame)
+    ca_total_frame.pack(pady=15)
+    
+    ca_total_var = tk.StringVar(value="0")
+    ttk.Label(ca_total_frame, text="CA Total:", font=('Helvetica', 12, 'bold')).pack(side="left", padx=5)
+    ttk.Label(ca_total_frame, textvariable=ca_total_var, font=('Helvetica', 14, 'bold'), foreground="#004080").pack(side="left")
     
     # Frame para hechizos
     hechizos_frame = ttk.LabelFrame(tab_inventario, text="Hechizos")
@@ -879,7 +894,7 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
     
     def actualizar_con_seleccion(hechizos_seleccionados):
         """Actualiza la lista de hechizos con los seleccionados"""
-        nonlocal hechizos  # ¡CORRECCIÓN AQUÍ! Usar nonlocal en lugar de global
+        nonlocal hechizos
         hechizos = hechizos_seleccionados
         actualizar_tabla_hechizos()
     
@@ -1153,6 +1168,10 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
             messagebox.showwarning("Advertencia", "El nivel y la experiencia deben ser números.")
             notebook.select(0)
             return
+        except KeyError:
+            messagebox.showwarning("Advertencia", "Nivel no válido en la tabla de experiencia.")
+            notebook.select(0)
+            return
         
         # Recopilar datos de competencias con armas y armaduras
         comp_armaduras = [armadura for armadura, var in armadura_vars.items() if var.get()]
@@ -1173,7 +1192,7 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
             "armas_especificas": armas_especificas_var.get(),
             "inventario": [],  # Vacío por ahora
             "equipamiento": {},  # Vacío por ahora
-            "hechizos": hechizos  # Usar la lista de hechizos actualizada
+            "hechizos": hechizos  # Mantener hechizos existentes
         }
         
         # Valores calculados
@@ -1210,3 +1229,21 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
     # Actualizar canvas después de que todo esté configurado
     canvas.update_idletasks()
     canvas.configure(scrollregion=canvas.bbox("all"))
+
+# Si se ejecuta como script principal
+if __name__ == "__main__":
+    # Crear ventana de prueba
+    root = tk.Tk()
+    root.title("Gestor de Personajes - D&D Combat Manager")
+    root.geometry("1024x768")
+    
+    # Configurar estilos
+    style = ttk.Style()
+    style.configure("Title.TLabel", font=('Helvetica', 24, 'bold'))
+    style.configure("Subtitle.TLabel", font=('Helvetica', 16, 'bold'))
+    
+    # Mostrar gestor de personajes
+    mostrar_gestor_personajes(root, lambda: root.quit())
+    
+    # Iniciar bucle principal
+    root.mainloop()
