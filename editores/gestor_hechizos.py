@@ -382,7 +382,7 @@ def calcular_daño(formula, nivel_lanzado=None, modificador=0):
     
     return (minimo, promedio, maximo, resultado)
 
-def mostrar_gestor_hechizos(root, callback_volver):
+def mostrar_gestor_hechizos(root, callback_volver=None):
     """
     Muestra la interfaz gráfica para gestionar hechizos
     
@@ -471,17 +471,17 @@ def mostrar_gestor_hechizos(root, callback_volver):
     columnas = ("nombre", "nivel", "escuela", "tipo", "clases")
     tree = ttk.Treeview(lista_frame, columns=columnas, show='headings', height=15)
     
-    # Configurar columnas
+    # Configurar columnas - ajustar anchura para evitar cortes
     tree.heading("nombre", text="Nombre")
     tree.heading("nivel", text="Nivel")
     tree.heading("escuela", text="Escuela")
     tree.heading("tipo", text="Tipo")
     tree.heading("clases", text="Clases")
     
-    tree.column("nombre", width=180)
-    tree.column("nivel", width=50, anchor="center")
-    tree.column("escuela", width=120)
-    tree.column("tipo", width=100)
+    tree.column("nombre", width=200)  # Más ancho
+    tree.column("nivel", width=60, anchor="center")
+    tree.column("escuela", width=140)  # Más ancho
+    tree.column("tipo", width=140)  # Más ancho
     tree.column("clases", width=200)
     
     # Añadir scrollbar
@@ -528,6 +528,8 @@ def mostrar_gestor_hechizos(root, callback_volver):
                 tipo = f"Salvación ({hechizo.get('tipo_salvacion', 'Ninguna')})"
             elif hechizo.get("tipo_ataque", "Ninguno") == "Ninguno":
                 tipo = "Utilidad"
+                if hechizo.get("curacion_base", ""):
+                    tipo = "Curación"
             
             # Mostrar clases abreviadas
             clases_abr = []
@@ -775,13 +777,13 @@ def mostrar_gestor_hechizos(root, callback_volver):
         # Crear ventana de diálogo
         dialogo = tk.Toplevel(root)
         dialogo.title(f"{modo} Hechizo")
-        dialogo.geometry("800x650")
+        dialogo.geometry("850x650")  # Aumentado el ancho para evitar cortados
         dialogo.transient(root)
         dialogo.grab_set()
         
         # Centrar diálogo
         dialogo.geometry("+%d+%d" % (
-            root.winfo_rootx() + (root.winfo_width() // 2) - 400,
+            root.winfo_rootx() + (root.winfo_width() // 2) - 425,  # Centrado ajustado
             root.winfo_rooty() + (root.winfo_height() // 2) - 325
         ))
         
@@ -1180,7 +1182,16 @@ def mostrar_gestor_hechizos(root, callback_volver):
         # Destruir el contenedor principal
         main_container.destroy()
         # Volver a la pantalla anterior
-        callback_volver()
+        if callback_volver:
+            callback_volver()
+        else:
+            # Si no hay callback, intentar mostrar menú principal
+            try:
+                from app_dnd import DnDApp
+                if hasattr(root, "mostrar_menu_principal"):
+                    root.mostrar_menu_principal()
+            except:
+                pass
     
     # Botones principales
     ttk.Button(botones_frame, text="Nuevo Hechizo", command=nuevo_hechizo).pack(side="left", padx=5)
@@ -1848,10 +1859,10 @@ def simular_lanzamiento_hechizo(hechizo, nivel_lanzamiento=None, estadistica_con
                     if match_nivel.group(3):
                         mod_adicional_nivel = int(match_nivel.group(3))
                     
-                    # Añadir daño por cada nivel adicional
-                    for _ in range(niveles_adicionales):
-                        daño_nivel = sum(random.randint(1, tipo_dado_nivel) for _ in range(num_dados_nivel)) + mod_adicional_nivel
-                        daño += daño_nivel
+                        # Añadir daño por cada nivel adicional
+                        for _ in range(niveles_adicionales):
+                            daño_nivel = sum(random.randint(1, tipo_dado_nivel) for _ in range(num_dados_nivel)) + mod_adicional_nivel
+                            daño += daño_nivel
             
             # Guardar resultado
             resultados["daño"]["resultado"] = daño
@@ -1887,10 +1898,10 @@ def simular_lanzamiento_hechizo(hechizo, nivel_lanzamiento=None, estadistica_con
                     if match_nivel.group(3):
                         mod_adicional_nivel = int(match_nivel.group(3))
                     
-                    # Añadir curación por cada nivel adicional
-                    for _ in range(niveles_adicionales):
-                        curacion_nivel = sum(random.randint(1, tipo_dado_nivel) for _ in range(num_dados_nivel)) + mod_adicional_nivel
-                        curacion += curacion_nivel
+                        # Añadir curación por cada nivel adicional
+                        for _ in range(niveles_adicionales):
+                            curacion_nivel = sum(random.randint(1, tipo_dado_nivel) for _ in range(num_dados_nivel)) + mod_adicional_nivel
+                            curacion += curacion_nivel
             
             # Guardar resultado
             resultados["curacion"]["resultado"] = curacion

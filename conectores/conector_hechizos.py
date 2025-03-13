@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Módulo para integrar el gestor de hechizos con el gestor de personajes.
+Versión simplificada para selección directa de hechizos.
 """
 
 import tkinter as tk
@@ -14,7 +15,7 @@ from editores import gestor_hechizos
 
 def mostrar_selector_hechizos_personaje(root, personaje, callback_seleccion):
     """
-    Muestra un selector de hechizos para añadir al personaje
+    Muestra un selector simplificado de hechizos para añadir al personaje
     
     Args:
         root: La ventana principal de la aplicación
@@ -48,29 +49,29 @@ def mostrar_selector_hechizos_personaje(root, personaje, callback_seleccion):
         else:
             return
     
-    # Crear ventana de diálogo
+    # Crear ventana de diálogo simplificada
     dialogo = tk.Toplevel(root)
     dialogo.title(f"Seleccionar Hechizos para {personaje.get('nombre', '')}")
-    dialogo.geometry("800x600")
+    dialogo.geometry("850x600")
     dialogo.transient(root)
     dialogo.grab_set()
     
     # Centrar diálogo
     dialogo.geometry("+%d+%d" % (
-        root.winfo_rootx() + (root.winfo_width() // 2) - 400,
+        root.winfo_rootx() + (root.winfo_width() // 2) - 425,
         root.winfo_rooty() + (root.winfo_height() // 2) - 300
     ))
     
-    # Contenedor principal con scroll
-    dialog_main = ttk.Frame(dialogo)
-    dialog_main.pack(fill="both", expand=True, padx=10, pady=10)
+    # Contenedor principal
+    main_frame = ttk.Frame(dialogo)
+    main_frame.pack(fill="both", expand=True, padx=10, pady=10)
     
     # Título
-    ttk.Label(dialog_main, text=f"Seleccionar Hechizos para {personaje.get('nombre', '')}", 
+    ttk.Label(main_frame, text=f"Seleccionar Hechizos para {personaje.get('nombre', '')}", 
               font=('Helvetica', 16, 'bold')).pack(pady=(0, 10))
     
     # Frame para filtros
-    filtro_frame = ttk.Frame(dialog_main)
+    filtro_frame = ttk.Frame(main_frame)
     filtro_frame.pack(fill="x", padx=5, pady=5)
     
     # Filtro por nivel
@@ -93,37 +94,31 @@ def mostrar_selector_hechizos_personaje(root, personaje, callback_seleccion):
     # Botón de filtrar
     ttk.Button(filtro_frame, text="Filtrar", command=lambda: actualizar_lista_hechizos()).pack(side="left", padx=20)
     
-    # Frame para lista de hechizos
-    lista_frame = ttk.Frame(dialog_main)
-    lista_frame.pack(fill="both", expand=True, padx=5, pady=5)
+    # Frame para lista de hechizos con scroll
+    lista_container = ttk.Frame(main_frame)
+    lista_container.pack(fill="both", expand=True, padx=5, pady=5)
     
-    # Crear Treeview para hechizos
-    columnas = ("seleccion", "nombre", "nivel", "escuela", "tipo")
-    tree = ttk.Treeview(lista_frame, columns=columnas, show='headings', height=15)
+    # Crear canvas con scrollbar
+    lista_canvas = tk.Canvas(lista_container)
+    lista_scrollbar = ttk.Scrollbar(lista_container, orient="vertical", command=lista_canvas.yview)
+    lista_frame = ttk.Frame(lista_canvas)
     
-    # Configurar columnas
-    tree.heading("seleccion", text="Seleccionar")
-    tree.heading("nombre", text="Nombre")
-    tree.heading("nivel", text="Nivel")
-    tree.heading("escuela", text="Escuela")
-    tree.heading("tipo", text="Tipo")
+    # Configurar canvas y scrollbar
+    lista_canvas.configure(yscrollcommand=lista_scrollbar.set)
+    lista_canvas.pack(side="left", fill="both", expand=True)
+    lista_scrollbar.pack(side="right", fill="y")
     
-    tree.column("seleccion", width=80, anchor="center")
-    tree.column("nombre", width=180)
-    tree.column("nivel", width=50, anchor="center")
-    tree.column("escuela", width=120)
-    tree.column("tipo", width=140)
+    # Añadir evento para redimensionar el frame en el canvas
+    def configure_lista_frame(event):
+        lista_canvas.configure(scrollregion=lista_canvas.bbox("all"))
+        lista_canvas.itemconfig(lista_frame_id, width=event.width)
     
-    # Añadir scrollbar
-    scrollbar_tree = ttk.Scrollbar(lista_frame, orient="vertical", command=tree.yview)
-    tree.configure(yscrollcommand=scrollbar_tree.set)
-    
-    # Ubicar componentes
-    tree.pack(side="left", fill="both", expand=True)
-    scrollbar_tree.pack(side="right", fill="y")
+    lista_frame_id = lista_canvas.create_window((0, 0), window=lista_frame, anchor="nw")
+    lista_frame.bind("<Configure>", configure_lista_frame)
+    lista_canvas.bind("<Configure>", lambda e: configure_lista_frame(e))
     
     # Panel de detalles del hechizo
-    detalles_frame = ttk.LabelFrame(dialog_main, text="Detalles del Hechizo")
+    detalles_frame = ttk.LabelFrame(main_frame, text="Detalles del Hechizo")
     detalles_frame.pack(fill="x", padx=5, pady=5)
     
     # Scrollable text para mostrar detalles
@@ -132,25 +127,21 @@ def mostrar_selector_hechizos_personaje(root, personaje, callback_seleccion):
     detalles_text.config(state=tk.DISABLED)
     
     # Marco para botones
-    botones_frame = ttk.Frame(dialog_main)
+    botones_frame = ttk.Frame(main_frame)
     botones_frame.pack(fill="x", padx=5, pady=10)
     
     # Obtener hechizos actuales del personaje
     hechizos_actuales = personaje.get("hechizos", [])
     
-    # Diccionario para mantener el estado de selección
+    # Diccionario para mantener el estado de selección y los widgets de checkbox
     seleccion = {}
-    
-    # Pre-seleccionar hechizos que ya tiene el personaje
-    for hechizo in hechizos_actuales:
-        hechizo_id = f"{hechizo.get('nombre', '')}_{hechizo.get('nivel', '0')}"
-        seleccion[hechizo_id] = True
+    checkbox_vars = {}
     
     # Función para actualizar la lista de hechizos según los filtros
     def actualizar_lista_hechizos():
         # Limpiar lista actual
-        for item in tree.get_children():
-            tree.delete(item)
+        for widget in lista_frame.winfo_children():
+            widget.destroy()
         
         # Obtener filtros
         nivel = None if nivel_filtro_var.get() == "Todos" else nivel_filtro_var.get()
@@ -162,8 +153,53 @@ def mostrar_selector_hechizos_personaje(root, personaje, callback_seleccion):
             filtro=nombre, nivel=nivel, escuela=escuela, clase=clase
         )
         
-        # Mostrar hechizos en la tabla
-        for hechizo in hechizos_filtrados:
+        # Crear encabezados
+        ttk.Label(lista_frame, text="Seleccionar", 
+                 font=("Helvetica", 11, "bold")).grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        ttk.Label(lista_frame, text="Nombre", 
+                 font=("Helvetica", 11, "bold")).grid(row=0, column=1, padx=5, pady=5, sticky="w")
+        ttk.Label(lista_frame, text="Nivel", 
+                 font=("Helvetica", 11, "bold")).grid(row=0, column=2, padx=5, pady=5, sticky="w")
+        ttk.Label(lista_frame, text="Escuela", 
+                 font=("Helvetica", 11, "bold")).grid(row=0, column=3, padx=5, pady=5, sticky="w")
+        ttk.Label(lista_frame, text="Tipo", 
+                 font=("Helvetica", 11, "bold")).grid(row=0, column=4, padx=5, pady=5, sticky="w")
+        
+        # Si no hay hechizos, mostrar mensaje
+        if not hechizos_filtrados:
+            ttk.Label(lista_frame, text="No se encontraron hechizos con esos filtros", 
+                     font=("Helvetica", 10, "italic")).grid(row=1, column=0, columnspan=5, padx=5, pady=10)
+            return
+        
+        # Mostrar hechizos en filas con checkboxes
+        for i, hechizo in enumerate(hechizos_filtrados):
+            # Obtener ID único para el hechizo
+            hechizo_id = f"{hechizo.get('nombre', '')}_{hechizo.get('nivel', '0')}"
+            
+            # Crear checkbox
+            checkbox_vars[hechizo_id] = tk.BooleanVar(value=False)
+            
+            # Pre-seleccionar si ya está en hechizos actuales
+            for h in hechizos_actuales:
+                if h.get("nombre") == hechizo.get("nombre") and h.get("nivel") == hechizo.get("nivel"):
+                    checkbox_vars[hechizo_id].set(True)
+                    seleccion[hechizo_id] = hechizo
+                    break
+            
+            # Añadir a selección si se marca
+            def actualizar_seleccion(var, hechizo_id, hechizo):
+                if var.get():
+                    seleccion[hechizo_id] = hechizo
+                else:
+                    if hechizo_id in seleccion:
+                        del seleccion[hechizo_id]
+            
+            # Checkbox vinculado a la función
+            chk = ttk.Checkbutton(lista_frame, variable=checkbox_vars[hechizo_id], 
+                                command=lambda v=checkbox_vars[hechizo_id], id=hechizo_id, h=hechizo: 
+                                actualizar_seleccion(v, id, h))
+            chk.grid(row=i+1, column=0, padx=5, pady=2)
+            
             # Determinar tipo de hechizo
             tipo = "Ataque"
             if hechizo.get("requiere_salvacion", False):
@@ -173,39 +209,18 @@ def mostrar_selector_hechizos_personaje(root, personaje, callback_seleccion):
                 if hechizo.get("curacion_base", ""):
                     tipo = "Curación"
             
-            # Obtener ID único para el hechizo
-            hechizo_id = f"{hechizo.get('nombre', '')}_{hechizo.get('nivel', '0')}"
+            # Mostrar datos del hechizo
+            nombre_btn = ttk.Button(lista_frame, text=hechizo.get("nombre", ""), 
+                                  style="Link.TButton",
+                                  command=lambda h=hechizo: mostrar_detalles_hechizo(h))
+            nombre_btn.grid(row=i+1, column=1, padx=5, pady=2, sticky="w")
             
-            # Obtener estado de selección
-            check_value = "✓" if seleccion.get(hechizo_id, False) else ""
-            
-            # Insertar en el árbol
-            tree.insert("", "end", values=(
-                check_value,
-                hechizo.get("nombre", ""),
-                hechizo.get("nivel", "0"),
-                hechizo.get("escuela", ""),
-                tipo
-            ), tags=(hechizo_id,))
+            ttk.Label(lista_frame, text=hechizo.get("nivel", "0")).grid(row=i+1, column=2, padx=5, pady=2, sticky="w")
+            ttk.Label(lista_frame, text=hechizo.get("escuela", "")).grid(row=i+1, column=3, padx=5, pady=2, sticky="w")
+            ttk.Label(lista_frame, text=tipo).grid(row=i+1, column=4, padx=5, pady=2, sticky="w")
     
-    # Función para mostrar detalles del hechizo seleccionado
-    def mostrar_detalles(event):
-        # Obtener ítem seleccionado
-        seleccion_actual = tree.selection()
-        if not seleccion_actual:
-            return
-        
-        # Obtener valores del ítem
-        item = tree.item(seleccion_actual[0])
-        nombre_hechizo = item["values"][1]
-        nivel_hechizo = item["values"][2]
-        
-        # Buscar hechizo en la base de datos
-        hechizo = gestor_hechizos.obtener_hechizo_por_nombre(nombre_hechizo, nivel_hechizo)
-        
-        if not hechizo:
-            return
-        
+    # Función para mostrar detalles del hechizo
+    def mostrar_detalles_hechizo(hechizo):
         # Habilitar el widget para actualizar
         detalles_text.config(state=tk.NORMAL)
         detalles_text.delete(1.0, tk.END)
@@ -246,212 +261,10 @@ def mostrar_selector_hechizos_personaje(root, personaje, callback_seleccion):
         detalles_text.insert(tk.END, detalles)
         detalles_text.config(state=tk.DISABLED)
     
-    # Función para manejar la selección/deselección
-    def alternar_seleccion(event):
-        # Obtener ítem seleccionado
-        seleccion_actual = tree.selection()
-        if not seleccion_actual:
-            return
-        
-        # Obtener valores del ítem
-        item = tree.item(seleccion_actual[0])
-        hechizo_id = tree.item(seleccion_actual[0], "tags")[0]
-        valores = list(item["values"])
-        
-        # Cambiar estado de selección
-        if valores[0] == "✓":
-            valores[0] = ""
-            seleccion[hechizo_id] = False
-        else:
-            valores[0] = "✓"
-            seleccion[hechizo_id] = True
-        
-        # Actualizar ítem
-        tree.item(seleccion_actual[0], values=valores)
-    
-    # Vincular eventos
-    tree.bind("<<TreeviewSelect>>", mostrar_detalles)
-    tree.bind("<Double-1>", alternar_seleccion)
-    
-    # Simular lanzamiento de un hechizo seleccionado
-    def simular_lanzamiento():
-        # Obtener ítem seleccionado
-        seleccion_actual = tree.selection()
-        if not seleccion_actual:
-            messagebox.showinfo("Información", "Por favor, seleccione un hechizo para simular.")
-            return
-        
-        # Obtener valores del ítem
-        item = tree.item(seleccion_actual[0])
-        nombre_hechizo = item["values"][1]
-        nivel_hechizo = item["values"][2]
-        
-        # Buscar hechizo en la base de datos
-        hechizo = gestor_hechizos.obtener_hechizo_por_nombre(nombre_hechizo, nivel_hechizo)
-        
-        if not hechizo:
-            messagebox.showinfo("Información", "No se pudo encontrar el hechizo seleccionado.")
-            return
-        
-        # Determinar estadística de lanzamiento según la clase
-        estadistica_principal = "Inteligencia"  # Por defecto para magos
-        if clase in ["Clérigo", "Druida", "Explorador"]:
-            estadistica_principal = "Sabiduría"
-        elif clase in ["Bardo", "Brujo", "Paladín", "Hechicero"]:
-            estadistica_principal = "Carisma"
-        
-        # Obtener modificador del atributo principal
-        estadisticas = personaje.get("estadisticas", {})
-        mod_atributo = 0
-        if estadistica_principal in estadisticas:
-            valor = estadisticas.get(estadistica_principal, 10)
-            mod_atributo = (valor - 10) // 2
-        
-        # Obtener nivel de personaje y calcular bonificador de competencia
-        nivel_personaje = personaje.get("nivel", 1)
-        bono_comp = 2 + ((nivel_personaje - 1) // 4)
-        
-        # Ventana para elegir nivel de lanzamiento
-        nivel_dialogo = tk.Toplevel(dialogo)
-        nivel_dialogo.title("Nivel de Lanzamiento")
-        nivel_dialogo.geometry("300x200")
-        nivel_dialogo.transient(dialogo)
-        nivel_dialogo.grab_set()
-        
-        # Centrar diálogo
-        nivel_dialogo.geometry("+%d+%d" % (
-            dialogo.winfo_rootx() + (dialogo.winfo_width() // 2) - 150,
-            dialogo.winfo_rooty() + (dialogo.winfo_height() // 2) - 100
-        ))
-        
-        ttk.Label(nivel_dialogo, text="Simular Lanzamiento", font=('Helvetica', 12, 'bold')).pack(pady=(10, 20))
-        
-        # Frame para nivel de lanzamiento
-        nivel_frame = ttk.Frame(nivel_dialogo)
-        nivel_frame.pack(fill="x", padx=20, pady=10)
-        
-        ttk.Label(nivel_frame, text="Nivel de lanzamiento:").pack(side="left", padx=5)
-        
-        # Determinar niveles disponibles
-        nivel_min = int(nivel_hechizo)
-        nivel_max = min(9, nivel_personaje)  # Limitar por nivel del personaje
-        
-        if nivel_min > nivel_max:
-            messagebox.showinfo("Información", 
-                               f"El personaje no tiene nivel suficiente para lanzar este hechizo (nivel {nivel_min}).")
-            nivel_dialogo.destroy()
-            return
-        
-        nivel_lanz_var = tk.StringVar(value=str(nivel_min))
-        nivel_values = [str(i) for i in range(nivel_min, nivel_max + 1)]
-        ttk.Combobox(nivel_frame, textvariable=nivel_lanz_var, values=nivel_values, width=5).pack(side="left", padx=5)
-        
-        # Función para completar simulación
-        def ejecutar_simulacion():
-            try:
-                nivel_lanzamiento = int(nivel_lanz_var.get())
-                
-                # Simular lanzamiento
-                resultado = gestor_hechizos.simular_lanzamiento_hechizo(
-                    hechizo, 
-                    nivel_lanzamiento=nivel_lanzamiento,
-                    estadistica_conjuros=mod_atributo,
-                    bono_competencia=bono_comp
-                )
-                
-                # Mostrar resultados
-                resultado_dialogo = tk.Toplevel(dialogo)
-                resultado_dialogo.title("Resultado de Lanzamiento")
-                resultado_dialogo.geometry("400x400")
-                resultado_dialogo.transient(dialogo)
-                resultado_dialogo.grab_set()
-                
-                # Centrar diálogo
-                resultado_dialogo.geometry("+%d+%d" % (
-                    dialogo.winfo_rootx() + (dialogo.winfo_width() // 2) - 200,
-                    dialogo.winfo_rooty() + (dialogo.winfo_height() // 2) - 200
-                ))
-                
-                ttk.Label(resultado_dialogo, text=f"Lanzamiento de {resultado['nombre']}", 
-                         font=('Helvetica', 14, 'bold')).pack(pady=(10, 5))
-                ttk.Label(resultado_dialogo, text=f"Nivel {resultado['nivel_lanzamiento']} ({resultado['nivel_hechizo']} + {resultado['nivel_lanzamiento'] - resultado['nivel_hechizo']})").pack(pady=(0, 10))
-                
-                # Valores de lanzamiento
-                info_frame = ttk.LabelFrame(resultado_dialogo, text="Información de Lanzamiento")
-                info_frame.pack(fill="x", padx=20, pady=5)
-                
-                ttk.Label(info_frame, text=f"CD de Salvación: {resultado['cd_salvacion']}").pack(anchor="w", padx=10, pady=2)
-                ttk.Label(info_frame, text=f"Bono de Ataque: +{resultado['bono_ataque']}").pack(anchor="w", padx=10, pady=2)
-                
-                # Tirada de ataque si hay
-                if resultado['tirada_ataque']:
-                    ataque_frame = ttk.LabelFrame(resultado_dialogo, text="Tirada de Ataque")
-                    ataque_frame.pack(fill="x", padx=20, pady=5)
-                    
-                    ttk.Label(ataque_frame, text=f"Tirada: {resultado['tirada_ataque']['d20']} (d20) + {resultado['tirada_ataque']['bono']} = {resultado['tirada_ataque']['total']}").pack(anchor="w", padx=10, pady=2)
-                    
-                    if resultado['tirada_ataque']['critico']:
-                        ttk.Label(ataque_frame, text="¡CRÍTICO!", foreground="green").pack(anchor="w", padx=10, pady=2)
-                    if resultado['tirada_ataque']['pifia']:
-                        ttk.Label(ataque_frame, text="¡PIFIA!", foreground="red").pack(anchor="w", padx=10, pady=2)
-                
-                # Salvación si hay
-                if resultado['exito_salvacion']:
-                    salv_frame = ttk.LabelFrame(resultado_dialogo, text=f"Salvación de {resultado['exito_salvacion']['tipo']}")
-                    salv_frame.pack(fill="x", padx=20, pady=5)
-                    
-                    ttk.Label(salv_frame, text=f"CD: {resultado['exito_salvacion']['cd']}").pack(anchor="w", padx=10, pady=2)
-                    ttk.Label(salv_frame, text=f"Tirada: {resultado['exito_salvacion']['d20']} (d20) + {resultado['exito_salvacion']['bono']} = {resultado['exito_salvacion']['total']}").pack(anchor="w", padx=10, pady=2)
-                    
-                    if resultado['exito_salvacion']['exito']:
-                        ttk.Label(salv_frame, text=f"¡ÉXITO! {resultado['exito_salvacion']['efecto']}").pack(anchor="w", padx=10, pady=2)
-                    else:
-                        ttk.Label(salv_frame, text="¡FALLO!").pack(anchor="w", padx=10, pady=2)
-                
-                # Daño si hay
-                if resultado['daño']['resultado'] > 0:
-                    daño_frame = ttk.LabelFrame(resultado_dialogo, text="Daño")
-                    daño_frame.pack(fill="x", padx=20, pady=5)
-                    
-                    ttk.Label(daño_frame, text=f"Tipo: {resultado['daño']['tipo']}").pack(anchor="w", padx=10, pady=2)
-                    ttk.Label(daño_frame, text=f"Resultado: {resultado['daño']['resultado']} puntos de daño").pack(anchor="w", padx=10, pady=2)
-                
-                # Curación si hay
-                if resultado['curacion']['resultado'] > 0:
-                    cur_frame = ttk.LabelFrame(resultado_dialogo, text="Curación")
-                    cur_frame.pack(fill="x", padx=20, pady=5)
-                    
-                    ttk.Label(cur_frame, text=f"Resultado: {resultado['curacion']['resultado']} puntos de golpe").pack(anchor="w", padx=10, pady=2)
-                
-                # Botón para cerrar
-                ttk.Button(resultado_dialogo, text="Cerrar", 
-                          command=resultado_dialogo.destroy).pack(pady=20)
-                
-                # Cerrar diálogo de nivel
-                nivel_dialogo.destroy()
-                
-            except Exception as e:
-                messagebox.showerror("Error", f"Error en la simulación: {str(e)}")
-                nivel_dialogo.destroy()
-        
-        # Botones
-        ttk.Button(nivel_dialogo, text="Simular", command=ejecutar_simulacion).pack(pady=20)
-        ttk.Button(nivel_dialogo, text="Cancelar", command=nivel_dialogo.destroy).pack(pady=5)
-    
     # Función para completar la selección
     def completar_seleccion():
         # Obtener hechizos seleccionados
-        hechizos_seleccionados = []
-        
-        for hechizo_id, seleccionado in seleccion.items():
-            if seleccionado:
-                # Extraer nombre y nivel del ID
-                nombre, nivel = hechizo_id.rsplit("_", 1)
-                
-                # Buscar hechizo completo
-                hechizo = gestor_hechizos.obtener_hechizo_por_nombre(nombre, nivel)
-                if hechizo:
-                    hechizos_seleccionados.append(hechizo)
+        hechizos_seleccionados = list(seleccion.values())
         
         # Cerrar diálogo
         dialogo.destroy()
@@ -459,18 +272,55 @@ def mostrar_selector_hechizos_personaje(root, personaje, callback_seleccion):
         # Llamar a callback con los hechizos seleccionados
         callback_seleccion(hechizos_seleccionados)
     
-    # Botones de acción
-    ttk.Button(botones_frame, text="Gestionar Hechizos", 
-              command=lambda: gestor_hechizos.mostrar_gestor_hechizos(root, lambda: mostrar_selector_hechizos_personaje(root, personaje, callback_seleccion))).pack(side="left", padx=5)
+    # Función para seleccionar/deseleccionar todos
+    def seleccionar_todos():
+        for hechizo_id, var in checkbox_vars.items():
+            var.set(True)
+            # Encontrar y añadir el hechizo correspondiente
+            for nivel, hechizos_nivel in hechizos.items():
+                for h in hechizos_nivel:
+                    if f"{h.get('nombre', '')}_{h.get('nivel', '0')}" == hechizo_id:
+                        seleccion[hechizo_id] = h
+                        break
     
-    ttk.Button(botones_frame, text="Simular Lanzamiento", 
-              command=simular_lanzamiento).pack(side="left", padx=5)
+    def deseleccionar_todos():
+        for var in checkbox_vars.values():
+            var.set(False)
+        seleccion.clear()
     
+    # Botones de selección múltiple
+    select_frame = ttk.Frame(main_frame)
+    select_frame.pack(fill="x", padx=5, pady=5)
+    
+    ttk.Button(select_frame, text="Seleccionar Todos", 
+              command=seleccionar_todos).pack(side="left", padx=5)
+    ttk.Button(select_frame, text="Deseleccionar Todos", 
+              command=deseleccionar_todos).pack(side="left", padx=5)
+    
+    # Botones principales
     ttk.Button(botones_frame, text="Aceptar", 
               command=completar_seleccion).pack(side="right", padx=5)
-    
     ttk.Button(botones_frame, text="Cancelar", 
               command=lambda: (dialogo.destroy(), callback_seleccion(hechizos_actuales))).pack(side="right", padx=5)
     
-    # Inicializar lista
+    # Inicializar lista de hechizos
     actualizar_lista_hechizos()
+    
+    # Configurar estilo para botones tipo enlace
+    style = ttk.Style()
+    style.configure("Link.TButton", background=None, foreground="blue", font=('Helvetica', 10, "underline"))
+    style.map("Link.TButton", background=[("active", None)], foreground=[("active", "purple")])
+    
+    # Permitir rueda del ratón para scroll en el canvas
+    def _on_mousewheel(event):
+        lista_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+    
+    lista_canvas.bind_all("<MouseWheel>", _on_mousewheel)
+    
+    # Cuando se cierra el diálogo, desenlazar eventos
+    def on_dialog_close():
+        lista_canvas.unbind_all("<MouseWheel>")
+        dialogo.destroy()
+        callback_seleccion(hechizos_actuales)
+    
+    dialogo.protocol("WM_DELETE_WINDOW", on_dialog_close)

@@ -756,6 +756,7 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
     tab_hechizos = ttk.Frame(notebook)
     
     def actualizar_tabs_hechizos(*args):
+        """Muestra u oculta la pestaña de hechizos basado en la clase"""
         # Muestra u oculta la pestaña de hechizos basado en la clase
         if clase_var.get() in CLASES_MAGICAS:
             # Verificar si la pestaña ya existe
@@ -771,21 +772,27 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
     # Vincular cambio de clase con actualización de pestañas
     clase_var.trace_add("write", actualizar_tabs_hechizos)
     
-    # Configurar pestaña de hechizos
+    # Configurar pestaña de hechizos con más espacio horizontal
     hechizos_frame = ttk.Frame(tab_hechizos)
     hechizos_frame.pack(fill="both", expand=True, padx=10, pady=10)
     
-    # Tabla de hechizos
-    ttk.Label(hechizos_frame, text="Hechizos Conocidos", font=("Helvetica", 12, "bold")).pack(pady=(0, 10))
+    # Título más visible
+    ttk.Label(hechizos_frame, text="Hechizos Conocidos", 
+             font=("Helvetica", 14, "bold")).pack(pady=(0, 15))
     
+    # Tabla de hechizos con columnas más anchas
     hechizos_table_frame = ttk.Frame(hechizos_frame)
     hechizos_table_frame.pack(fill="both", expand=True)
     
-    # Cabecera de tabla
-    ttk.Label(hechizos_table_frame, text="Nombre", width=25, font=("Helvetica", 10, "bold")).grid(row=0, column=0, padx=5, pady=5, sticky="w")
-    ttk.Label(hechizos_table_frame, text="Daño", width=10, font=("Helvetica", 10, "bold")).grid(row=0, column=1, padx=5, pady=5, sticky="w")
-    ttk.Label(hechizos_table_frame, text="Nivel", width=5, font=("Helvetica", 10, "bold")).grid(row=0, column=2, padx=5, pady=5, sticky="w")
-    ttk.Label(hechizos_table_frame, text="Acciones", width=10, font=("Helvetica", 10, "bold")).grid(row=0, column=3, padx=5, pady=5, sticky="w")
+    # Cabecera de tabla con más espacio
+    ttk.Label(hechizos_table_frame, text="Nombre", width=30, 
+             font=("Helvetica", 11, "bold")).grid(row=0, column=0, padx=5, pady=5, sticky="w")
+    ttk.Label(hechizos_table_frame, text="Daño", width=15, 
+             font=("Helvetica", 11, "bold")).grid(row=0, column=1, padx=5, pady=5, sticky="w")
+    ttk.Label(hechizos_table_frame, text="Nivel", width=8, 
+             font=("Helvetica", 11, "bold")).grid(row=0, column=2, padx=5, pady=5, sticky="w")
+    ttk.Label(hechizos_table_frame, text="Acciones", width=15, 
+             font=("Helvetica", 11, "bold")).grid(row=0, column=3, padx=5, pady=5, sticky="w")
     
     # Lista para almacenar hechizos
     hechizos = personaje.get("hechizos", []) if personaje else []
@@ -798,11 +805,21 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
                 widget.destroy()
         
         if not hechizos:
-            ttk.Label(hechizos_table_frame, text="No hay hechizos añadidos").grid(row=1, column=0, columnspan=4, padx=5, pady=10)
+            ttk.Label(hechizos_table_frame, text="No hay hechizos añadidos", 
+                     font=("Helvetica", 10, "italic")).grid(row=1, column=0, columnspan=4, padx=5, pady=10)
         else:
             for i, hechizo in enumerate(hechizos):
-                ttk.Label(hechizos_table_frame, text=hechizo.get("nombre", "")).grid(row=i+1, column=0, padx=5, pady=3, sticky="w")
-                ttk.Label(hechizos_table_frame, text=hechizo.get("daño", "")).grid(row=i+1, column=1, padx=5, pady=3, sticky="w")
+                ttk.Label(hechizos_table_frame, text=hechizo.get("nombre", ""),
+                         wraplength=200).grid(row=i+1, column=0, padx=5, pady=3, sticky="w")
+                
+                # Mostrar info de daño/curación
+                daño_info = ""
+                if hechizo.get("daño_base", ""):
+                    daño_info = f"{hechizo.get('daño_base', '')} {hechizo.get('tipo_daño', '')}"
+                elif hechizo.get("curacion_base", ""):
+                    daño_info = f"Cura: {hechizo.get('curacion_base', '')}"
+                
+                ttk.Label(hechizos_table_frame, text=daño_info).grid(row=i+1, column=1, padx=5, pady=3, sticky="w")
                 ttk.Label(hechizos_table_frame, text=str(hechizo.get("nivel", ""))).grid(row=i+1, column=2, padx=5, pady=3, sticky="w")
                 
                 # Botones de acción
@@ -810,7 +827,7 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
                 accion_frame.grid(row=i+1, column=3, padx=5, pady=3, sticky="w")
                 
                 ttk.Button(accion_frame, text="Eliminar", 
-                          command=lambda idx=i: eliminar_hechizo(idx)).pack(side="left", padx=2)
+                         command=lambda idx=i: eliminar_hechizo(idx)).pack(side="left", padx=2)
     
     def eliminar_hechizo(indice):
         """Elimina un hechizo de la lista"""
@@ -818,8 +835,8 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
             del hechizos[indice]
             actualizar_tabla_hechizos()
     
-    def mostrar_form_hechizo():
-        """Muestra el selector de hechizos"""
+    def mostrar_selector_hechizos():
+        """Muestra el selector simplificado de hechizos"""
         # Importar el conector directamente
         import sys
         import os
@@ -854,10 +871,11 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
                                                lambda selected: actualizar_con_seleccion(selected))
             
         except Exception as e:
-            # Si hay cualquier error, mostrar información y caer al formulario manual
+            # Si hay cualquier error, mostrar información
             print(f"Error al cargar selector de hechizos: {str(e)}")
+            messagebox.showerror("Error", f"Error al cargar selector de hechizos: {str(e)}")
             # En caso de error, usar el formulario manual
-            mostrar_form_hechizo_manual()
+            messagebox.showerror("Error", "No se pudo cargar el selector de hechizos.")
     
     def actualizar_con_seleccion(hechizos_seleccionados):
         """Actualiza la lista de hechizos con los seleccionados"""
@@ -865,117 +883,12 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
         hechizos = hechizos_seleccionados
         actualizar_tabla_hechizos()
     
-    def mostrar_form_hechizo_manual():
-        """Muestra el formulario manual para añadir un hechizo"""
-        dialogo = tk.Toplevel(root)
-        dialogo.title("Añadir Hechizo Manualmente")
-        dialogo.geometry("400x350")
-        dialogo.resizable(False, False)
-        dialogo.transient(root)
-        dialogo.grab_set()
-        
-        # Centrar la ventana
-        dialogo.geometry("+%d+%d" % (
-            root.winfo_rootx() + (root.winfo_width() // 2) - 200,
-            root.winfo_rooty() + (root.winfo_height() // 2) - 175
-        ))
-        
-        # Contenido del diálogo
-        ttk.Label(dialogo, text="Añadir Nuevo Hechizo", style="Header.TLabel").pack(pady=(20, 10))
-        
-        # Frame para los campos
-        form_frame = ttk.Frame(dialogo)
-        form_frame.pack(fill="x", padx=20, pady=10)
-        
-        # Nombre del hechizo
-        ttk.Label(form_frame, text="Nombre:").grid(row=0, column=0, sticky="w", pady=5)
-        nombre_var = tk.StringVar()
-        ttk.Entry(form_frame, textvariable=nombre_var, width=30).grid(row=0, column=1, sticky="ew", pady=5)
-        
-        # Nivel
-        ttk.Label(form_frame, text="Nivel:").grid(row=1, column=0, sticky="w", pady=5)
-        nivel_var = tk.StringVar(value="0")
-        nivel_combo = ttk.Combobox(form_frame, textvariable=nivel_var, values=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], width=5)
-        nivel_combo.grid(row=1, column=1, sticky="w", pady=5)
-        nivel_combo.current(0)
-        
-        # Daño
-        ttk.Label(form_frame, text="Daño:").grid(row=2, column=0, sticky="w", pady=5)
-        dano_var = tk.StringVar()
-        ttk.Entry(form_frame, textvariable=dano_var, width=15).grid(row=2, column=1, sticky="w", pady=5)
-        ttk.Label(form_frame, text="(ej: 2d6, 1d8+3)").grid(row=2, column=2, sticky="w", pady=5)
-        
-        # Escuela
-        ttk.Label(form_frame, text="Escuela:").grid(row=3, column=0, sticky="w", pady=5)
-        escuela_var = tk.StringVar()
-        escuelas = ["Abjuración", "Adivinación", "Conjuración", "Encantamiento", 
-                    "Evocación", "Ilusión", "Nigromancia", "Transmutación"]
-        ttk.Combobox(form_frame, textvariable=escuela_var, values=escuelas, width=28).grid(row=3, column=1, sticky="ew", pady=5)
-        
-        # Tiempo de lanzamiento
-        ttk.Label(form_frame, text="Tiempo:").grid(row=4, column=0, sticky="w", pady=5)
-        tiempo_var = tk.StringVar(value="1 acción")
-        ttk.Entry(form_frame, textvariable=tiempo_var, width=20).grid(row=4, column=1, sticky="w", pady=5)
-        
-        # Alcance
-        ttk.Label(form_frame, text="Alcance:").grid(row=5, column=0, sticky="w", pady=5)
-        alcance_var = tk.StringVar(value="30 pies")
-        ttk.Entry(form_frame, textvariable=alcance_var, width=20).grid(row=5, column=1, sticky="w", pady=5)
-        
-        # Descripción
-        ttk.Label(form_frame, text="Descripción:").grid(row=6, column=0, sticky="nw", pady=5)
-        descripcion_text = tk.Text(form_frame, height=4, width=30)
-        descripcion_text.grid(row=6, column=1, columnspan=2, sticky="ew", pady=5)
-        
-        # Botones
-        botones_frame = ttk.Frame(dialogo)
-        botones_frame.pack(fill="x", padx=20, pady=(20, 10))
-        
-        def validar_y_agregar():
-            # Validar campos obligatorios
-            if not nombre_var.get().strip():
-                messagebox.showwarning("Advertencia", "Debe ingresar un nombre para el hechizo.")
-                return
-            
-            try:
-                nivel = int(nivel_var.get())
-                if nivel < 0 or nivel > 9:
-                    messagebox.showwarning("Advertencia", "El nivel del hechizo debe estar entre 0 y 9.")
-                    return
-            except ValueError:
-                messagebox.showwarning("Advertencia", "El nivel debe ser un número.")
-                return
-            
-            # Crear hechizo
-            hechizo = {
-                "nombre": nombre_var.get().strip(),
-                "nivel": nivel,
-                "daño": dano_var.get().strip(),
-                "escuela": escuela_var.get(),
-                "tiempo": tiempo_var.get().strip(),
-                "alcance": alcance_var.get().strip(),
-                "descripcion": descripcion_text.get("1.0", "end-1c")
-            }
-            
-            # Añadir a la lista
-            global hechizos
-            hechizos.append(hechizo)
-            
-            # Actualizar tabla
-            actualizar_tabla_hechizos()
-            
-            # Cerrar diálogo
-            dialogo.destroy()
-        
-        ttk.Button(botones_frame, text="Añadir", command=validar_y_agregar).pack(side="right", padx=5)
-        ttk.Button(botones_frame, text="Cancelar", command=dialogo.destroy).pack(side="right", padx=5)
-    
     # Inicializar tabla de hechizos
     actualizar_tabla_hechizos()
     
-    # Botón para añadir hechizo
+    # Botón para añadir hechizo con más espacio y mejor posicionamiento
     ttk.Button(hechizos_frame, text="Añadir Hechizo", 
-              command=mostrar_form_hechizo).pack(pady=10)
+              command=mostrar_selector_hechizos).pack(pady=15)
     
     # Actualizar pestañas según la clase inicial
     actualizar_tabs_hechizos()
