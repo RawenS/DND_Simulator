@@ -209,9 +209,8 @@ def mostrar_selector_hechizos_personaje(root, personaje, callback_seleccion):
                 if hechizo.get("curacion_base", ""):
                     tipo = "Curación"
             
-            # Mostrar datos del hechizo
-            nombre_btn = ttk.Button(lista_frame, text=hechizo.get("nombre", ""), 
-                                  style="Link.TButton",
+            # Usar un botón normal sin estilos especiales
+            nombre_btn = ttk.Button(lista_frame, text=hechizo.get("nombre", ""),
                                   command=lambda h=hechizo: mostrar_detalles_hechizo(h))
             nombre_btn.grid(row=i+1, column=1, padx=5, pady=2, sticky="w")
             
@@ -305,11 +304,6 @@ def mostrar_selector_hechizos_personaje(root, personaje, callback_seleccion):
     
     # Inicializar lista de hechizos
     actualizar_lista_hechizos()
-    
-    # Configurar estilo para botones tipo enlace
-    style = ttk.Style()
-    style.configure("Link.TButton", background=None, foreground="blue", font=('Helvetica', 10, "underline"))
-    style.map("Link.TButton", background=[("active", None)], foreground=[("active", "purple")])
     
     # Permitir rueda del ratón para scroll en el canvas
     def _on_mousewheel(event):

@@ -26,7 +26,34 @@
     "armas_especificas": "",
     "inventario": [],
     "equipamiento": {},
-    "hechizos": [],
+    "hechizos": [
+        {
+            "nombre": "Curar Heridas",
+            "nivel": 1,
+            "escuela": "Evocación",
+            "tiempo_lanzamiento": "1 acción",
+            "alcance": "Toque",
+            "componentes": "V, S",
+            "duracion": "Instantáneo",
+            "tipo_ataque": "Ninguno",
+            "requiere_salvacion": false,
+            "tipo_salvacion": "Ninguna",
+            "efecto_salvacion": "Ningún daño",
+            "daño_base": "",
+            "tipo_daño": "Ninguno",
+            "curacion_base": "1d8+4",
+            "daño_nivel_superior": "",
+            "curacion_nivel_superior": "1d8",
+            "clases": [
+                "Bardo",
+                "Clérigo",
+                "Druida",
+                "Paladín",
+                "Explorador"
+            ],
+            "descripcion": "Una criatura que tocas recupera un número de puntos de golpe igual a 1d8 + tu modificador de característica de lanzamiento de conjuros. Este hechizo no tiene efecto sobre no muertos o constructos.\nA niveles superiores: Cuando lanzas este hechizo usando un espacio de conjuro de nivel 2 o superior, la cantidad de curación aumenta en 1d8 por cada nivel por encima de 1."
+        }
+    ],
     "bonif_comp": "+2",
     "cd_conjuro": "10",
     "ataque_conjuro": "+2",

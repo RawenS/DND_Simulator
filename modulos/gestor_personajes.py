@@ -469,11 +469,11 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
     conjuro_frame.grid(row=len(ESTADISTICAS)+1, column=0, columnspan=4, sticky="w", padx=10, pady=10)
     
     ttk.Label(conjuro_frame, text="CD de Conjuro:").grid(row=0, column=0, sticky="w", padx=5, pady=2)
-    cd_conjuro_var = tk.StringVar(value="10")
+    cd_conjuro_var = tk.StringVar(value=personaje.get("cd_conjuro", "10") if personaje else "10")
     ttk.Label(conjuro_frame, textvariable=cd_conjuro_var, width=3).grid(row=0, column=1, sticky="w", padx=5, pady=2)
     
     ttk.Label(conjuro_frame, text="Bonificador de Conjuro:").grid(row=1, column=0, sticky="w", padx=5, pady=2)
-    ataque_conjuro_var = tk.StringVar(value="+0")
+    ataque_conjuro_var = tk.StringVar(value=personaje.get("ataque_conjuro", "+0") if personaje else "+0")
     ttk.Label(conjuro_frame, textvariable=ataque_conjuro_var, width=3).grid(row=1, column=1, sticky="w", padx=5, pady=2)
     
     # Nota sobre tiradas manuales
@@ -598,11 +598,11 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
     ataques_frame.pack(fill="x", padx=10, pady=10)
     
     ttk.Label(ataques_frame, text="Ataque con Fuerza:").grid(row=0, column=0, sticky="w", padx=10, pady=5)
-    ataque_fuerza_var = tk.StringVar(value="+0")
+    ataque_fuerza_var = tk.StringVar(value=personaje.get("ataque_fuerza", "+0") if personaje else "+0")
     ttk.Label(ataques_frame, textvariable=ataque_fuerza_var, width=5).grid(row=0, column=1, sticky="w", padx=5, pady=5)
     
     ttk.Label(ataques_frame, text="Ataque con Destreza:").grid(row=1, column=0, sticky="w", padx=10, pady=5)
-    ataque_destreza_var = tk.StringVar(value="+0")
+    ataque_destreza_var = tk.StringVar(value=personaje.get("ataque_destreza", "+0") if personaje else "+0")
     ttk.Label(ataques_frame, textvariable=ataque_destreza_var, width=5).grid(row=1, column=1, sticky="w", padx=5, pady=5)
     
     # Nota informativa sobre tiradas manuales
@@ -879,7 +879,7 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
     
     def actualizar_con_seleccion(hechizos_seleccionados):
         """Actualiza la lista de hechizos con los seleccionados"""
-        global hechizos
+        nonlocal hechizos  # ¡CORRECCIÓN AQUÍ! Usar nonlocal en lugar de global
         hechizos = hechizos_seleccionados
         actualizar_tabla_hechizos()
     
@@ -1173,7 +1173,7 @@ def mostrar_crear_editar_personaje(root, personaje, directorio_personajes, callb
             "armas_especificas": armas_especificas_var.get(),
             "inventario": [],  # Vacío por ahora
             "equipamiento": {},  # Vacío por ahora
-            "hechizos": hechizos  # Mantener hechizos existentes
+            "hechizos": hechizos  # Usar la lista de hechizos actualizada
         }
         
         # Valores calculados
